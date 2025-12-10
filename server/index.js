@@ -1,31 +1,38 @@
-// index.js
-
-// 1. Importar las librerías
-import express from 'express'; // El servidor en sí
-import cors from 'cors';       // Permiso para que el front hable con el back
-import dotenv from 'dotenv';   // Para leer variables de entorno
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 
-// Cargar configuración de variables de entorno (si tuvieras un archivo .env)
 dotenv.config();
 
-// 2. Crear la aplicación de Express
 const app = express();
 
-// 3. Middlewares (Configuraciones intermedias)
-app.use(cors());                 // Habilitar CORS
-app.use(express.json());         // Permitir que el servidor entienda datos JSON (muy importante para el login)
+app.use(cors());
+app.use(express.json());
 
-// 4. Rutas (Endpoints)
-// Esta es una ruta de prueba para ver si funciona
-app.get('/', (req, res) => {
-    res.send('¡Hola! El servidor del Pet Shop está funcionando 🐶🐱');
-});
-
-// 5. Levantar el servidor
-const PORT = process.env.PORT || 4000; // Usar el puerto definido o el 4000
 // Routing
 app.use('/api/users', userRoutes);
-app.listen(PORT, () => {
-    console.log(`✅ Servidor corriendo en: http://localhost:${PORT}`);
-});
+
+const conectarDB = async () => {
+    try {
+        // Volvemos a usar la variable de entorno
+        const db = await mongoose.connect(process.env.MONGO_URI);
+
+        const url = `${db.connection.host}:${db.connection.port}`;
+        console.log(`2. ✅ MongoDB conectado en: ${url}`);
+
+        // Iniciamos el servidor SOLO si la DB conecta
+        const PORT = process.env.PORT || 4000;
+        app.listen(PORT, () => {
+            console.log(`3. 🚀 Servidor corriendo en puerto ${PORT}`);
+        });
+
+    } catch (error) {
+        console.log(`2. ❌ Error conectando a MongoDB: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+console.log('1. ⏳ Iniciando servidor...');
+conectarDB();
