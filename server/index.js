@@ -4,6 +4,7 @@
 import express from 'express'; // El servidor en sí
 import cors from 'cors';       // Permiso para que el front hable con el back
 import dotenv from 'dotenv';   // Para leer variables de entorno
+import userRoutes from './routes/userRoutes.js';
 
 // Cargar configuración de variables de entorno (si tuvieras un archivo .env)
 dotenv.config();
@@ -23,6 +24,8 @@ app.get('/', (req, res) => {
 
 // 5. Levantar el servidor
 const PORT = process.env.PORT || 4000; // Usar el puerto definido o el 4000
+// Routing
+app.use('/api/users', userRoutes);
 app.listen(PORT, () => {
     console.log(`✅ Servidor corriendo en: http://localhost:${PORT}`);
 });
