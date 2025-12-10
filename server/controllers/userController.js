@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import generarJWT from '../helpers/generarJWT.js';
 
 const registrarUsuario = async (req, res) => {
     // req.body contiene los datos que envía el usuario (nombre, email, password)
@@ -20,13 +21,45 @@ const registrarUsuario = async (req, res) => {
         const usuarioAlmacenado = await usuario.save();
 
         // 4. Responder al Frontend con los datos guardados
-        res.json(usuarioAlmacenado);
+        res.json({
+            _id: usuarioAlmacenado._id,
+            name: usuarioAlmacenado.name,
+            email: usuarioAlmacenado.email,
+            token: generarJWT(usuarioAlmacenado._id),
+        });
 
     } catch (error) {
         console.log(error);
     }
 };
 
+
+const autenticar = async (req, res) => {
+    const { email, password } = req.body;
+
+    // 1. Comprobar si el usuario existe
+    const usuario = await User.findOne({ email });
+    if (!usuario) {
+        const error = new Error('El usuario no existe');
+        return res.status(404).json({ msg: error.message });
+    }
+
+    // 2. Comprobar su password
+    // Usamos el método que definimos en el Modelo (comprobarPassword)
+    if (await usuario.comprobarPassword(password)) {
+        res.json({
+            _id: usuario._id,
+            name: usuario.name,
+            email: usuario.email,
+            token: generarJWT(usuario._id),
+        });
+    } else {
+        const error = new Error('El Password es incorrecto');
+        return res.status(403).json({ msg: error.message });
+    }
+};
+
 export {
-    registrarUsuario
+    registrarUsuario,
+    autenticar
 };

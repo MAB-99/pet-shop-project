@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routing
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 
 const conectarDB = async () => {
     try {

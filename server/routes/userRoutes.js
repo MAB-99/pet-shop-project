@@ -1,9 +1,10 @@
 import express from 'express';
-import { registrarUsuario } from '../controllers/userController.js';
+import { registrarUsuario, autenticar } from '../controllers/userController.js';
 
 const router = express.Router();
 
-// Cuando alguien visite '/' (la raíz de usuarios) usando POST, ejecuta registrarUsuario
+// Autenticación, Registro y Confirmación de Usuarios
 router.post('/', registrarUsuario);
+router.post('/login', autenticar);
 
 export default router;
