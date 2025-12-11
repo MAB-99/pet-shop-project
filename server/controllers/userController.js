@@ -59,7 +59,14 @@ const autenticar = async (req, res) => {
     }
 };
 
+const perfil = (req, res) => {
+    // Al pasar por el middleware, ya tenemos el usuario guardado en req.user
+    const { user } = req;
+    res.json(user);
+};
+
 export {
     registrarUsuario,
-    autenticar
+    autenticar,
+    perfil
 };
