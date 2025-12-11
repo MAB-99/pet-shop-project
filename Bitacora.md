@@ -113,3 +113,12 @@ La función para crear tokens recibe 3 parámetros:
 - **Rutas Públicas vs Privadas:**
     - `GET /api/products`: Pública (todos ven el catálogo).
     - `POST /api/products`: Privada (requiere Token, usamos `checkAuth`).
+
+## 18. Rutas Dinámicas y CRUD Completo
+- **Parametros de URL (`req.params`):**
+    - En la ruta definimos `:id` (ej: `router.route('/:id')`).
+    - Express captura lo que escribamos ahí y lo guarda en `req.params.id`.
+    - Usamos ese ID para buscar en la base de datos con `.findById(id)`.
+- **Métodos HTTP:**
+    - `PUT`: Para actualizar un recurso existente.
+    - `DELETE`: Para eliminar un recurso.

@@ -19,7 +19,71 @@ const obtenerProductos = async (req, res) => {
     res.json(productos);
 };
 
+// 3. Obtener UN solo producto (Por ID)
+const obtenerProducto = async (req, res) => {
+    const { id } = req.params; // Viene de la URL: /api/product/12345
+
+    try {
+        const producto = await Product.findById(id);
+
+        if (!producto) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+        res.json(producto);
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ msg: 'ID no válido o producto no encontrado' });
+    }
+};
+
+// 4. Actualizar un producto
+const actualizarProducto = async (req, res) => {
+    const { id } = req.params;
+    const producto = await Product.findById(id);
+
+    if (!producto) {
+        return res.status(404).json({ msg: 'Producto no encontrado' });
+    }
+
+    // Actualizamos los campos (Si no envían nada, dejamos el valor viejo)
+    producto.name = req.body.name || producto.name;
+    producto.price = req.body.price || producto.price;
+    producto.description = req.body.description || producto.description;
+    producto.image = req.body.image || producto.image;
+    producto.stock = req.body.stock || producto.stock;
+    producto.category = req.body.category || producto.category;
+
+    try {
+        const productoActualizado = await producto.save();
+        res.json(productoActualizado);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// 5. Eliminar un producto
+const eliminarProducto = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const producto = await Product.findById(id);
+
+        if (!producto) {
+            return res.status(404).json({ msg: 'Producto no encontrado' });
+        }
+
+        await producto.deleteOne();
+        res.json({ msg: 'Producto eliminado correctamente' });
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ msg: 'Error al eliminar' });
+    }
+};
+
 export {
     agregarProducto,
-    obtenerProductos
+    obtenerProductos,
+    obtenerProducto,
+    actualizarProducto,
+    eliminarProducto
 };
