@@ -106,3 +106,10 @@ La función para crear tokens recibe 3 parámetros:
 - **Flujo:** `Request` -> `checkAuth` (Verifica Token) -> `Controller`.
 - **Bearer Token:** Es el estándar para enviar tokens. El cliente envía `Authorization: Bearer <token>`.
 - **req.user:** En el middleware, si el token es válido, buscamos al usuario en la DB y lo guardamos en `req.user`. Así, cualquier controlador siguiente ya sabe quién es el usuario sin volver a consultar la DB.
+
+## 17. Lógica de Negocio: Productos
+- **Modelo (`Product.js`):** Estructura de los items que venderemos.
+- **Validación `enum`:** Restringe un campo de texto a una lista específica de valores permitidos (ej: solo 'perro' o 'gato').
+- **Rutas Públicas vs Privadas:**
+    - `GET /api/products`: Pública (todos ven el catálogo).
+    - `POST /api/products`: Privada (requiere Token, usamos `checkAuth`).
