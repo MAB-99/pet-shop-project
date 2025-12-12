@@ -122,3 +122,11 @@ La función para crear tokens recibe 3 parámetros:
 - **Métodos HTTP:**
     - `PUT`: Para actualizar un recurso existente.
     - `DELETE`: Para eliminar un recurso.
+
+## 19. Modelado de Pedidos y Relaciones
+- **Relaciones en Mongoose:**
+    - Usamos `mongoose.Schema.Types.ObjectId` para indicar que un campo guarda el ID de otro documento.
+    - Usamos `ref: 'Modelo'` para indicar a qué colección pertenece ese ID.
+- **Flujo de Compra:**
+    - El pedido (`Order`) guarda el ID del usuario (`user`) y un array de items.
+    - Usamos `req.user._id` (obtenido del token JWT) para asignar automáticamente la compra al usuario logueado.
