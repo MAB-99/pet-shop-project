@@ -1,5 +1,7 @@
 # Bitácora de Desarrollo - Pet Shop
 
+# Fase 1: Backend  (Node.js + Express + MongoDB)--------------------------------------------------------------------------------------------------------------------------------------
+
 ## 1. Arquitectura del Backend
 - **Node.js + Express:** Nuestro servidor web.
 - **MongoDB:** Base de datos NoSQL (orientada a documentos).
@@ -130,3 +132,22 @@ La función para crear tokens recibe 3 parámetros:
 - **Flujo de Compra:**
     - El pedido (`Order`) guarda el ID del usuario (`user`) y un array de items.
     - Usamos `req.user._id` (obtenido del token JWT) para asignar automáticamente la compra al usuario logueado.
+
+# Fase 2: Frontend (React + Vite)-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+## 20. Inicialización del Cliente
+- **Herramienta:** Vite (más rápido que Webpack/CRA).
+- **Comando:** `npm create vite@latest client`.
+- **Estructura:**
+    - `/server`: Todo el Backend (Node/Express).
+    - `/client`: Todo el Frontend (React).
+    - Son dos proyectos "separados" que conviven en la misma carpeta principal.
+
+## 21. Estructura y Routing del Frontend
+- **Limpieza:** Eliminamos el boilerplate de Vite (`App.css`, `index.css`).
+- **React Router Dom:** Librería estándar para navegación en SPAs.
+    - `BrowserRouter`: Componente padre que envuelve toda la aplicación en `main.jsx` para habilitar la navegación sin recargas.
+- **Arquitectura de Carpetas:**
+    - `pages`: Vistas completas (Rutas).
+    - `components`: Piezas reutilizables.
+    - `layout`: Estructura maestra (Navbar, Footer).
