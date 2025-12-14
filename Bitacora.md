@@ -227,3 +227,13 @@ La función para crear tokens recibe 3 parámetros:
     - Maneja estado "Nuevo" (POST) y "Editar" (PUT).
     - Previsualización de imágenes en tiempo real.
     - Integración fluida en el Dashboard para alternar entre tabla y formulario.
+
+## 30. Gestión de Órdenes (Admin Panel)
+- **Backend**: 
+  - Se modificó el modelo `Order.js` para incluir el campo `status` con estados definidos (Pendiente, Enviado, Entregado, Cancelado).
+  - Se agregaron los controladores `getAllOrders` (para ver todo el historial) y `updateOrderStatus` (para cambiar el estado) en `orderController.js`.
+  - Se definieron las rutas correspondientes en `orderRoutes.js`.
+- **Frontend**:
+  - Se implementó la lógica completa en el componente `OrdersTab` dentro de `AdminDashboard.jsx`.
+  - Ahora se listan todas las compras de la base de datos en una tabla con diseño responsivo.
+  - Se integró la funcionalidad para cambiar el estado de la orden en tiempo real mediante un menú desplegable.
