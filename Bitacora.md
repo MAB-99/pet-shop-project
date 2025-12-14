@@ -151,3 +151,33 @@ La función para crear tokens recibe 3 parámetros:
     - `pages`: Vistas completas (Rutas).
     - `components`: Piezas reutilizables.
     - `layout`: Estructura maestra (Navbar, Footer).
+
+## 22. Integración de Estilos (Tailwind CSS)
+- **Decisión:** Se detectó que el proyecto anterior ("Horizon") usaba Tailwind CSS. Para reutilizar el código visual, se instaló en el nuevo proyecto.
+- **Versión:** Se optó por **Tailwind v3.4 (Estable)** en lugar de la v4 (Beta) para evitar conflictos de configuración con Vite.
+- **Configuración:**
+  - `tailwind.config.js`: Se configuró el `content` para escanear archivos `.jsx` en `/src`.
+  - `index.css`: Se agregaron las directivas `@tailwind base`, `components` y `utilities`.
+
+## 23. Conexión Frontend-Backend (Login)
+- **Librería HTTP:** Se instaló **Axios** para realizar peticiones al servidor.
+- **Adaptación de Componentes:** Se migró el formulario de Login de Horizon.
+  - Se reemplazaron componentes complejos externos (shadcn/ui) por etiquetas HTML estándar (`<button>`, `<input>`) manteniendo las clases de Tailwind para preservar el diseño idéntico.
+- **Convención de Rutas:** Se reafirmó la importancia de usar rutas en **SINGULAR** para coincidir con el Backend:
+  - Backend: `POST /api/user/login`
+  - Frontend: `axios.post('http://localhost:4000/api/user/login', ...)`
+
+## 24. Estado Global (Context API + AuthProvider)
+- **Problema:** React "olvida" al usuario al cambiar de página.
+- **Solución:** Implementación de `AuthProvider` (Context API).
+  - Envuelve a toda la aplicación en `App.jsx`.
+  - Al cargar la app (`useEffect`), busca si existe un `token` en `localStorage`.
+  - Si existe, lo valida contra el Backend (`GET /perfil`) y guarda los datos del usuario en un estado global `auth`.
+- **Persistencia:** Permite que el usuario recargue la página (F5) sin perder la sesión.
+
+## 25. Custom Hooks y Errores Comunes
+- **Hook `useAuth`:** Se creó un hook personalizado para consumir el contexto de autenticación fácilmente (`const { auth } = useAuth()`).
+- **Error de Importación (ES Modules):**
+  - **Error:** `Uncaught SyntaxError: ... does not provide an export named 'useAuth'`.
+  - **Causa:** Intentar importar con llaves `{ useAuth }` una función que fue exportada como `export default`.
+  - **Solución:** Importar sin llaves: `import useAuth from ...`.

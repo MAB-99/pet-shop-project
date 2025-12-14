@@ -1,35 +1,26 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import Login from './pages/Login';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
-import useAuth from './hooks/useAuth';
+import MainLayout from './layout/MainLayout';
+import Login from './pages/Login';
+
+// Componente Home temporal
+const Home = () => <div className="h-screen flex items-center justify-center text-3xl">Página de Inicio</div>;
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+
+        {/* Rutas Públicas envueltas en el MainLayout */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Home />} />
+          <Route path="login" element={<Login />} />
+          {/* Aquí agregaremos /tienda, /producto/:id, etc. */}
+        </Route>
+
       </Routes>
     </AuthProvider>
   )
-}
-
-function Home() {
-  const { auth } = useAuth();
-
-  return (
-    <div className="p-10 text-center">
-      <h1 className="text-4xl font-bold mb-4">
-        {auth._id ? `Hola de nuevo, ${auth.name} 👋` : 'Bienvenido a la Tienda 🐶'}
-      </h1>
-
-      {!auth._id && (
-        <Link to="/login" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          Ir a Iniciar Sesión
-        </Link>
-      )}
-    </div>
-  );
 }
 
 export default App;
