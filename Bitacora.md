@@ -215,3 +215,15 @@ La función para crear tokens recibe 3 parámetros:
   - Creación de ruta protegida `/perfil`.
   - Visualización de datos del usuario y **Historial de Pedidos** (`GET /api/order/myorders`).
   - Backend: Se añadieron los controladores y rutas para soportar la consulta de historial personal.
+
+## 29. Panel de Administración (Fases 1 y 2)
+- **Estructura del Dashboard:**
+  - Creación de `AdminDashboard.jsx` con sistema de pestañas (Resumen, Productos, Órdenes).
+  - Protección de ruta en Frontend: Redirección automática si el usuario no tiene `isAdmin: true`.
+- **Gestión de Productos (CRUD):**
+  - **Lectura:** Componente `ProductsTable.jsx` que lista el inventario con indicadores visuales de stock bajo.
+  - **Eliminación:** Funcionalidad para borrar productos (`DELETE /api/product/:id`) con confirmación.
+  - **Creación y Edición:** Componente `ProductForm.jsx` reutilizable.
+    - Maneja estado "Nuevo" (POST) y "Editar" (PUT).
+    - Previsualización de imágenes en tiempo real.
+    - Integración fluida en el Dashboard para alternar entre tabla y formulario.

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
 import { CartProvider } from './context/CartProvider';
 import MainLayout from './layout/MainLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // PÁGINAS
 import Login from './pages/Login';
@@ -19,6 +20,7 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="tienda" element={<Shop />} />
             <Route path="perfil" element={<Profile />} />
+            <Route path="admin" element={<AdminDashboard />} />
           </Route>
         </Routes>
       </CartProvider>
