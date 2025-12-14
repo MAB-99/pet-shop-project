@@ -1,24 +1,27 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import { CartProvider } from './context/CartProvider';
 import MainLayout from './layout/MainLayout';
-import Login from './pages/Login';
 
-// Componente Home temporal
-const Home = () => <div className="h-screen flex items-center justify-center text-3xl">Página de Inicio</div>;
+// PÁGINAS
+import Login from './pages/Login';
+import Home from './pages/Home';
+import Shop from './pages/Shop';
+import Profile from './pages/Profile';
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-
-        {/* Rutas Públicas envueltas en el MainLayout */}
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          {/* Aquí agregaremos /tienda, /producto/:id, etc. */}
-        </Route>
-
-      </Routes>
+      <CartProvider>
+        <Routes>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="tienda" element={<Shop />} />
+            <Route path="perfil" element={<Profile />} />
+          </Route>
+        </Routes>
+      </CartProvider>
     </AuthProvider>
   )
 }

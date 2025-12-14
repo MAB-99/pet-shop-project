@@ -36,6 +36,18 @@ const addOrderItems = async (req, res) => {
     }
 };
 
+const getMyOrders = async (req, res) => {
+    try {
+        // Buscamos órdenes donde el campo 'user' coincida con el ID del usuario logueado (req.user._id)
+        const orders = await Order.find({ user: req.user._id });
+        res.json(orders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error al obtener las órdenes' });
+    }
+};
+
 export {
-    addOrderItems
+    addOrderItems,
+    getMyOrders
 };

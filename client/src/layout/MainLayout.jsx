@@ -1,21 +1,25 @@
 import { Outlet } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CartDrawer from '../components/CartDrawer';
+import useCart from '../hooks/useCart';
 
 const MainLayout = () => {
+    // Obtenemos el estado de visibilidad del contexto
+    const { isCartOpen, closeCart } = useCart();
+
     return (
-        <div className="flex flex-col min-h-screen">
-            {/* 1. Header Fijo arriba */}
+        <div className="flex flex-col min-h-screen relative"> {/* relative es importante */}
             <Header />
 
-            {/* 2. Contenido Variable (Outlet) */}
             <main className="flex-1">
-                {/* Aquí React Router renderizará el Login, el Home, etc. */}
                 <Outlet />
             </main>
 
-            {/* 3. Footer al final */}
             <Footer />
+
+            {/* EL CARRITO VIVE AQUÍ, FLOTANDO SOBRE TODO */}
+            <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
         </div>
     );
 };

@@ -181,3 +181,37 @@ La función para crear tokens recibe 3 parámetros:
   - **Error:** `Uncaught SyntaxError: ... does not provide an export named 'useAuth'`.
   - **Causa:** Intentar importar con llaves `{ useAuth }` una función que fue exportada como `export default`.
   - **Solución:** Importar sin llaves: `import useAuth from ...`.
+
+## 26. Estructura Maestra (Layout y UI Global)
+- **Constantes Globales:** Se creó `client/src/lib/constants.js` para centralizar datos de la empresa (dirección, redes sociales) y evitar "hardcoding".
+- **Componentes UI:**
+  - **Footer:** Migrado y adaptado. Usa las constantes globales.
+  - **Header (Navbar):** Reescrito para eliminar dependencias externas (`shadcn/ui`).
+    - Integra `useAuth` para mostrar avatar de usuario o botón de login.
+    - Menú móvil y dropdown de usuario funcional con estados locales (`useState`).
+- **Layout Principal:** Creación de `MainLayout.jsx` que implementa el patrón de diseño `Header + Outlet + Footer`. Esto evita repetir código en cada página.
+
+## 27. Migración de Página de Inicio (Home)
+- **Librerías Visuales:**
+  - `react-helmet`: Para gestión de SEO (títulos de pestaña y metadatos).
+  - `framer-motion`: Para animaciones de entrada y transiciones suaves.
+- **Adaptación:** Se migró el `Home.jsx` de Horizon, reemplazando componentes propietarios por HTML5 + Tailwind CSS, manteniendo la estética original (Banner, Features, Ubicación).
+- **Solución de Errores:**
+  - Error de caché en Vite con Framer Motion (`Could not resolve react/jsx-runtime`). Solucionado forzando el reinicio con `npm run dev -- --force`.
+
+## 28. Ciclo de E-commerce Completo (Tienda, Carrito y Perfil)
+- **Tienda (Shop):**
+  - Implementación de `Shop.jsx` con consumo de API real (`/api/product`).
+  - Lógica de filtrado en cliente (Categoría, Precio, Buscador).
+  - Tarjetas de producto (`ProductCard.jsx`) con control de stock visual.
+- **Gestión del Carrito (Global State):**
+  - Creación de `CartProvider` y hook `useCart` para manejar el estado global de la compra.
+  - Funciones: agregar, eliminar, modificar cantidad y calcular totales.
+  - Persistencia en `localStorage`.
+- **Checkout & UI:**
+  - `CartDrawer`: Panel deslizante lateral integrado en `MainLayout`.
+  - Lógica de Checkout: Validación de usuario logueado y envío de orden al Backend (`POST /api/order`).
+- **Perfil de Usuario:**
+  - Creación de ruta protegida `/perfil`.
+  - Visualización de datos del usuario y **Historial de Pedidos** (`GET /api/order/myorders`).
+  - Backend: Se añadieron los controladores y rutas para soportar la consulta de historial personal.

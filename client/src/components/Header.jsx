@@ -2,20 +2,23 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ShoppingCart, User, LogOut, Shield, ChevronDown } from 'lucide-react';
+
+// IMPORTACIONES SEPARADAS (Muy importante)
 import useAuth from '../hooks/useAuth';
+import useCart from '../hooks/useCart';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // Nuevo estado para el dropdown manual
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Conectamos con nuestro AuthContext real
+    // 1. Hook de USUARIO (Para auth, cerrarSesion)
     const { auth, cerrarSesion } = useAuth();
 
-    // Placeholder para el carrito (Aún no implementado)
-    const cartCount = 0;
+    // 2. Hook de CARRITO (Para itemsCount, toggleCart)
+    const { itemsCount, toggleCart } = useCart();
 
     const navItems = [
         { name: 'Inicio', path: '/' },
@@ -32,6 +35,9 @@ const Header = () => {
         setIsUserMenuOpen(false);
         navigate('/');
     };
+
+    // Protección extra: Si auth falla por alguna razón, usamos un objeto vacío
+    const user = auth || {};
 
     return (
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm shadow-sm">
@@ -50,7 +56,7 @@ const Header = () => {
                         </span>
                     </Link>
 
-                    {/* DESKTOP NAVIGATION */}
+                    {/* NAV ESCRITORIO */}
                     <div className="hidden md:flex items-center space-x-1">
                         {navItems.map((item) => (
                             <Link key={item.path} to={item.path}>
@@ -74,37 +80,35 @@ const Header = () => {
                         ))}
                     </div>
 
-                    {/* RIGHT SIDE ICONS */}
+                    {/* ICONOS LADO DERECHO */}
                     <div className="flex items-center space-x-4">
 
-                        {/* CART ICON (Placeholder) */}
+                        {/* 🛒 BOTÓN CARRITO (Usa toggleCart del Contexto) */}
                         <button
                             className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
-                            onClick={() => alert("El carrito estará disponible pronto")}
+                            onClick={toggleCart}
                         >
                             <ShoppingCart className="h-5 w-5" />
-                            {cartCount > 0 && (
+                            {itemsCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                                    {cartCount}
+                                    {itemsCount}
                                 </span>
                             )}
                         </button>
 
-                        {/* USER AUTH SECTION */}
-                        {auth._id ? (
+                        {/* 👤 SECCIÓN USUARIO (Usa auth del Contexto) */}
+                        {user._id ? (
                             <div className="relative">
-                                {/* Botón del Usuario */}
                                 <button
                                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                                     className="flex items-center space-x-2 p-1 pr-3 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
                                 >
                                     <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold">
-                                        {auth.name?.charAt(0).toUpperCase() || 'U'}
+                                        {user.name?.charAt(0).toUpperCase() || 'U'}
                                     </div>
                                     <ChevronDown className="h-4 w-4 text-gray-500" />
                                 </button>
 
-                                {/* Dropdown Menu Manual */}
                                 <AnimatePresence>
                                     {isUserMenuOpen && (
                                         <motion.div
@@ -114,15 +118,15 @@ const Header = () => {
                                             className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-100 py-1 overflow-hidden z-50"
                                         >
                                             <div className="px-4 py-3 border-b border-gray-100">
-                                                <p className="text-sm font-medium text-gray-900">{auth.name}</p>
-                                                <p className="text-xs text-gray-500 truncate">{auth.email}</p>
+                                                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                             </div>
 
                                             <Link to="/perfil" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsUserMenuOpen(false)}>
                                                 <User className="mr-2 h-4 w-4" /> Mi Perfil
                                             </Link>
 
-                                            {auth.isAdmin && (
+                                            {user.isAdmin && (
                                                 <Link to="/admin" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsUserMenuOpen(false)}>
                                                     <Shield className="mr-2 h-4 w-4" /> Panel Admin
                                                 </Link>
@@ -141,7 +145,6 @@ const Header = () => {
                                 </AnimatePresence>
                             </div>
                         ) : (
-                            /* Si NO está logueado */
                             <Link to="/login">
                                 <button className="hidden sm:flex bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
                                     Ingresar
@@ -152,7 +155,7 @@ const Header = () => {
                             </Link>
                         )}
 
-                        {/* MOBILE MENU TOGGLE */}
+                        {/* TOGGLE MENÚ MÓVIL */}
                         <button
                             className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-md"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -162,7 +165,7 @@ const Header = () => {
                     </div>
                 </div>
 
-                {/* MOBILE MENU DROPDOWN */}
+                {/* MENÚ MÓVIL */}
                 <AnimatePresence>
                     {isMenuOpen && (
                         <motion.div
@@ -182,7 +185,7 @@ const Header = () => {
                                     {item.name}
                                 </Link>
                             ))}
-                            {!auth._id && (
+                            {!user._id && (
                                 <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                                     <button className="w-full mt-4 bg-gray-900 text-white py-3 rounded-md font-bold">
                                         Ingresar / Registrarse
