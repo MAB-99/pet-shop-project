@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-
+import appointmentRoutes from './routes/appointmentRoutes.js';
 
 dotenv.config();
 
@@ -18,6 +18,7 @@ app.use(express.json());
 app.use('/api/user', userRoutes);
 app.use('/api/product', productRoutes);
 app.use('/api/order', orderRoutes);
+app.use('/api/appointment', appointmentRoutes);
 
 const conectarDB = async () => {
     try {

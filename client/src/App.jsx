@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Profile from './pages/Profile';
+import Services from './pages/Services';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="tienda" element={<Shop />} />
             <Route path="perfil" element={<Profile />} />
             <Route path="admin" element={<AdminDashboard />} />
+            <Route path="servicios" element={<Services />} />
           </Route>
         </Routes>
       </CartProvider>

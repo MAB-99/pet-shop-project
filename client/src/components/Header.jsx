@@ -23,7 +23,7 @@ const Header = () => {
     const navItems = [
         { name: 'Inicio', path: '/' },
         { name: 'Tienda', path: '/tienda' },
-        { name: 'Peluquería', path: '/peluqueria' },
+        { name: 'Peluquería', path: '/servicios' },
         { name: 'Sobre Nosotros', path: '/nosotros' },
         { name: 'Contacto', path: '/contacto' },
     ];
@@ -62,8 +62,8 @@ const Header = () => {
                             <Link key={item.path} to={item.path}>
                                 <button
                                     className={`relative px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.path)
-                                            ? 'text-yellow-600 font-bold'
-                                            : 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50'
+                                        ? 'text-yellow-600 font-bold'
+                                        : 'text-gray-700 hover:text-yellow-600 hover:bg-yellow-50'
                                         }`}
                                 >
                                     {item.name}

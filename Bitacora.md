@@ -250,3 +250,18 @@ La función para crear tokens recibe 3 parámetros:
   - Integración en `AdminDashboard.jsx` (Componente `OverviewTab`).
   - Carga de datos asíncrona (`useEffect` + `fetch`) al montar el componente.
   - Formateo de moneda local (`toLocaleString`) para mostrar los montos.
+
+## 31. Servicio de Peluquería y Gestión de Turnos (Appointments)
+- **Objetivo:** Permitir a los clientes solicitar turnos y al administrador gestionarlos, confirmando fechas y contactando vía WhatsApp.
+- **Backend:**
+  - **Modelo `Appointment`:** Se creó el esquema con soporte para `confirmedDate` (fecha real del turno) y estados (`Pendiente`, `Confirmado`, `Finalizado`, `Cancelado`).
+  - **Controladores:** Lógica para crear solicitud (Cliente), listar todas (Admin) y actualizar estado/fecha (Admin).
+  - **Rutas:** Se configuró `/api/appointment` y se registró en `index.js`.
+- **Frontend (Cliente):**
+  - **Página `Services.jsx`:** Formulario validado que requiere autenticación. Envía nombre de mascota, foto, contacto y notas.
+- **Frontend (Admin Dashboard):**
+  - **Pestaña `AppointmentsTab`:**
+    - Visualización de solicitudes en tarjetas.
+    - **Botón WhatsApp:** Enlace directo (`wa.me`) pre-llenado con mensaje personalizado.
+    - **Zoom de Imagen:** Modal emergente para ver la foto de la mascota en detalle.
+    - **Agenda Inteligente:** Al cambiar estado a "Confirmado", se abre un modal para seleccionar Fecha/Hora y muestra una lista de horarios ya ocupados para evitar superposiciones.
