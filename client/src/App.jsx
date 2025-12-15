@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Profile from './pages/Profile';
 import Services from './pages/Services';
+import About from './pages/About';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="perfil" element={<Profile />} />
             <Route path="admin" element={<AdminDashboard />} />
             <Route path="servicios" element={<Services />} />
+            <Route path="nosotros" element={<About />} />
           </Route>
         </Routes>
       </CartProvider>

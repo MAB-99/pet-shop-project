@@ -238,7 +238,7 @@ La función para crear tokens recibe 3 parámetros:
   - Ahora se listan todas las compras de la base de datos en una tabla con diseño responsivo.
   - Se integró la funcionalidad para cambiar el estado de la orden en tiempo real mediante un menú desplegable.
 
-## 30. Panel de Administración: Resumen General (Dashboard Stats)
+## 31. Panel de Administración: Resumen General (Dashboard Stats)
 - **Objetivo:** Mostrar métricas clave del negocio en tiempo real en la pantalla de bienvenida del admin.
 - **Backend:**
   - Se creó el controlador `getDashboardStats` en `orderController.js`.
@@ -251,7 +251,7 @@ La función para crear tokens recibe 3 parámetros:
   - Carga de datos asíncrona (`useEffect` + `fetch`) al montar el componente.
   - Formateo de moneda local (`toLocaleString`) para mostrar los montos.
 
-## 31. Servicio de Peluquería y Gestión de Turnos (Appointments)
+## 32. Servicio de Peluquería y Gestión de Turnos (Appointments)
 - **Objetivo:** Permitir a los clientes solicitar turnos y al administrador gestionarlos, confirmando fechas y contactando vía WhatsApp.
 - **Backend:**
   - **Modelo `Appointment`:** Se creó el esquema con soporte para `confirmedDate` (fecha real del turno) y estados (`Pendiente`, `Confirmado`, `Finalizado`, `Cancelado`).
@@ -265,3 +265,11 @@ La función para crear tokens recibe 3 parámetros:
     - **Botón WhatsApp:** Enlace directo (`wa.me`) pre-llenado con mensaje personalizado.
     - **Zoom de Imagen:** Modal emergente para ver la foto de la mascota en detalle.
     - **Agenda Inteligente:** Al cambiar estado a "Confirmado", se abre un modal para seleccionar Fecha/Hora y muestra una lista de horarios ya ocupados para evitar superposiciones.
+  
+## 33. Página Institucional "Sobre Nosotros"
+- **Objetivo:** Migrar el contenido institucional del sitio anterior para generar confianza en la marca.
+- **Implementación:**
+  - Creación de `About.jsx` utilizando `framer-motion` para animaciones de entrada.
+  - Diseño responsivo con Tailwind CSS, incluyendo sección "Hero" con imagen de fondo y grilla de valores.
+  - Integración de `lucide-react` para iconografía.
+  - Configuración de SEO básico con `react-helmet`.
