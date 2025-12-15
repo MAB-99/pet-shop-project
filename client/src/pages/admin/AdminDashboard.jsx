@@ -6,25 +6,62 @@ import useAuth from '../../hooks/useAuth';
 import ProductTable from './ProductTable';
 import ProductForm from '../../components/ProductForm';
 
-const OverviewTab = () => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Resumen General</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <p className="text-blue-600 text-sm font-semibold">Ventas Totales</p>
-                <p className="text-2xl font-bold text-blue-900">$0.00</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                <p className="text-green-600 text-sm font-semibold">Órdenes Recientes</p>
-                <p className="text-2xl font-bold text-green-900">0</p>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                <p className="text-yellow-600 text-sm font-semibold">Productos Activos</p>
-                <p className="text-2xl font-bold text-yellow-900">0</p>
+const OverviewTab = () => {
+    const [stats, setStats] = useState({ totalSales: 0, totalOrders: 0, totalProducts: 0 });
+    const { auth } = useAuth(); // Para obtener el token si usas context
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:4000/api/order/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                setStats(data);
+            } catch (error) {
+                console.error("Error cargando estadísticas:", error);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Resumen General</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                {/* Tarjeta de Ventas */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <p className="text-blue-600 text-sm font-semibold">Ventas Totales</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                        ${stats.totalSales.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </p>
+                </div>
+
+                {/* Tarjeta de Órdenes */}
+                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <p className="text-green-600 text-sm font-semibold">Órdenes Activas</p>
+                    <p className="text-2xl font-bold text-green-900">
+                        {stats.totalOrders}
+                    </p>
+                </div>
+
+                {/* Tarjeta de Productos */}
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                    <p className="text-yellow-600 text-sm font-semibold">Productos en Catálogo</p>
+                    <p className="text-2xl font-bold text-yellow-900">
+                        {stats.totalProducts}
+                    </p>
+                </div>
+
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const ProductsTab = () => {
     const [view, setView] = useState('table');

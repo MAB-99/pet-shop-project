@@ -1,4 +1,5 @@
 import Order from '../models/Order.js';
+import Product from '../models/Product.js';
 
 const addOrderItems = async (req, res) => {
     const {
@@ -78,9 +79,33 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+const getDashboardStats = async (req, res) => {
+    try {
+        // 1. Ventas Totales y Cantidad de Órdenes
+        // Filtramos para no sumar órdenes canceladas
+        const orders = await Order.find({ status: { $ne: 'Cancelado' } });
+
+        const totalSales = orders.reduce((acc, order) => acc + order.totalPrice, 0);
+        const totalOrders = orders.length;
+
+        // 2. Cantidad de Productos en catálogo
+        const totalProducts = await Product.countDocuments();
+
+        res.json({
+            totalSales,
+            totalOrders,
+            totalProducts
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error al obtener estadísticas' });
+    }
+};
+
 export {
     addOrderItems,
     getMyOrders,
     getAllOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    getDashboardStats
 };

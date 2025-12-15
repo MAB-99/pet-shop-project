@@ -237,3 +237,16 @@ La función para crear tokens recibe 3 parámetros:
   - Se implementó la lógica completa en el componente `OrdersTab` dentro de `AdminDashboard.jsx`.
   - Ahora se listan todas las compras de la base de datos en una tabla con diseño responsivo.
   - Se integró la funcionalidad para cambiar el estado de la orden en tiempo real mediante un menú desplegable.
+
+## 30. Panel de Administración: Resumen General (Dashboard Stats)
+- **Objetivo:** Mostrar métricas clave del negocio en tiempo real en la pantalla de bienvenida del admin.
+- **Backend:**
+  - Se creó el controlador `getDashboardStats` en `orderController.js`.
+  - Lógica:
+    - **Ventas Totales:** Suma del `totalPrice` de todas las órdenes (excluyendo canceladas).
+    - **Conteo:** Uso de `countDocuments` para el total de productos y `length` para las órdenes.
+  - Ruta: `GET /api/order/stats` (Protegida con `checkAuth`).
+- **Frontend:**
+  - Integración en `AdminDashboard.jsx` (Componente `OverviewTab`).
+  - Carga de datos asíncrona (`useEffect` + `fetch`) al montar el componente.
+  - Formateo de moneda local (`toLocaleString`) para mostrar los montos.
