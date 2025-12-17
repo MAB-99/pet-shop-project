@@ -25,7 +25,7 @@ const Register = () => {
 
         try {
             // Petición al Backend
-            const response = await fetch(`${API_URL}/api/user`, { // Asumimos que POST /api/user crea el usuario
+            const response = await fetch(`${API_URL}/api/user/registro`, { // Asumimos que POST /api/user crea el usuario
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
