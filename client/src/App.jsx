@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Services from './pages/Services';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="servicios" element={<Services />} />
             <Route path="nosotros" element={<About />} />
             <Route path="contacto" element={<Contact />} />
+            <Route path="registro" element={<Register />} />
           </Route>
         </Routes>
       </CartProvider>
