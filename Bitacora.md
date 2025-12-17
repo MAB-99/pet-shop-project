@@ -281,3 +281,12 @@ La función para crear tokens recibe 3 parámetros:
   - Formulario funcional con redirección automática a WhatsApp pre-llenado.
   - Integración de mapa (iframe) y lista de redes sociales/horarios.
   - Diseño responsivo con animaciones suaves (`framer-motion`).
+
+## 35. Integración de Imágenes con Cloudinary
+- **Objetivo:** Permitir la subida de imágenes reales desde el dispositivo del usuario/admin en lugar de depender de URLs de texto.
+- **Configuración:**
+  - Se creó cuenta en Cloudinary y se configuró un "Upload Preset" en modo *Unsigned* para permitir cargas desde el frontend.
+- **Frontend:**
+  - Creación del helper utilitario `client/src/lib/uploadImage.js` para gestionar la petición a la API de Cloudinary.
+  - **Admin (Productos):** Se modificó `ProductForm.jsx` para aceptar inputs de tipo `file`, mostrando una previsualización de la imagen y un estado de carga ("Subiendo...").
+  - **Cliente (Servicios):** Se actualizó `Services.jsx` para que los usuarios puedan subir la foto de su mascota al solicitar un turno.

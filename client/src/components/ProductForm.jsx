@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Save, X, ImageIcon, Loader2 } from 'lucide-react';
+import uploadImage from '../lib/uploadImage';
+import { Upload } from 'lucide-react';
 
 const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -13,6 +15,21 @@ const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
     });
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState('');
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setUploading(true);
+            const url = await uploadImage(file);
+            setUploading(false);
+
+            if (url) {
+                // Actualizamos el form con la URL que nos dio Cloudinary
+                setFormData({ ...formData, image: url });
+            }
+        }
+    };
 
     // Si recibimos un producto para editar, llenamos el formulario
     useEffect(() => {
@@ -137,30 +154,46 @@ const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
                 </div>
 
                 {/* COLUMNA DERECHA: Imagen */}
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen</label>
-                        <div className="flex gap-2">
+                <div>
+                    <label className="block text-gray-700 text-sm font-bold mb-2">Imagen del Producto</label>
+
+                    <div className="flex items-center gap-4">
+                        {/* Previsualización */}
+                        <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 relative">
+                            {uploading ? (
+                                <span className="text-xs text-blue-500 font-bold animate-pulse">Subiendo...</span>
+                            ) : formData.image ? (
+                                <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <Upload className="text-gray-400" />
+                            )}
+                        </div>
+
+                        {/* Input de archivo oculto + Botón personalizado */}
+                        <div className="flex-1">
                             <input
-                                type="text" name="image" required
-                                value={formData.image} onChange={handleChange}
-                                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-yellow-50 file:text-yellow-700
+                  hover:file:bg-yellow-100
+                  cursor-pointer"
+                                disabled={uploading}
+                            />
+                            <p className="text-xs text-gray-400 mt-1">O pega la URL manual abajo si prefieres:</p>
+                            <input
+                                type="text"
+                                name="image"
+                                value={formData.image}
+                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                className="w-full border-b border-gray-300 text-xs py-1 focus:outline-none focus:border-yellow-500 mt-1"
                                 placeholder="https://..."
                             />
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">Recomendamos usar imágenes de Unsplash.</p>
-                    </div>
-
-                    {/* Previsualización */}
-                    <div className="w-full aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden relative">
-                        {preview ? (
-                            <img src={preview} alt="Vista previa" className="w-full h-full object-cover" onError={(e) => e.target.src = 'https://via.placeholder.com/300?text=Error+URL'} />
-                        ) : (
-                            <div className="text-center text-gray-400">
-                                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                                <p>Vista Previa</p>
-                            </div>
-                        )}
                     </div>
                 </div>
 

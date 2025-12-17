@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send, Instagram } from 'lucide-react';
 import { CONTACT_INFO } from '../lib/constants';
 
+
 const Contact = () => {
     const [formData, setFormData] = useState({
         name: '',
@@ -26,7 +27,7 @@ const Contact = () => {
         }
 
         // Lógica de WhatsApp
-        const whatsappMessage = `Hola! Me contacto desde el formulario web de FIDO'S PET SHOP:\n\nNombre: ${formData.name}\nEmail: ${formData.email}\nTeléfono: ${formData.phone}\nMensaje: ${formData.message}`;
+        const whatsappMessage = `Hola! Me contacto desde el formulario web de FIDO'S PET SHOP:\n\nNombre: ${formData.name}\nEmail: ${formData.email}\n${formData.message}`;
 
         window.open(`${CONTACT_INFO.WHATSAPP_URL || 'https://wa.me/5493510000000'}?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
 

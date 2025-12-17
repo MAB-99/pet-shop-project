@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import uploadImage from '../lib/uploadImage';
+
 
 const Services = () => {
     const { auth } = useAuth();
@@ -13,6 +15,21 @@ const Services = () => {
         notes: ''
     });
     const [mensaje, setMensaje] = useState(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setUploading(true);
+            const url = await uploadImage(file);
+            setUploading(false);
+
+            if (url) {
+                // Actualizamos el form con la URL que nos dio Cloudinary
+                setFormData({ ...formData, image: url });
+            }
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -74,16 +91,32 @@ const Services = () => {
                     </div>
 
                     <div>
-                        <label className="block text-gray-700 font-bold mb-2">Foto de la Mascota (URL)</label>
-                        <input
-                            type="text"
-                            className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:border-yellow-500"
-                            placeholder="https://ejemplo.com/foto.jpg"
-                            value={formData.petPhoto}
-                            onChange={(e) => setFormData({ ...formData, petPhoto: e.target.value })}
-                            required
-                        />
-                        <p className="text-xs text-gray-400 mt-1">* Pega un enlace a una foto (Instagram, Drive público, etc)</p>
+                        <label className="block text-gray-700 font-bold mb-2">Foto de la Mascota</label>
+
+                        <div className="flex items-start gap-4">
+                            {formData.petPhoto && (
+                                <img src={formData.petPhoto} alt="Mascota" className="w-20 h-20 object-cover rounded-lg border shadow-sm" />
+                            )}
+
+                            <div className="flex-1">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setUploading(true);
+                                            const url = await uploadImage(file);
+                                            setUploading(false);
+                                            if (url) setFormData({ ...formData, petPhoto: url });
+                                        }
+                                    }}
+                                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
+                                    disabled={uploading}
+                                />
+                                {uploading && <p className="text-xs text-blue-500 mt-1">Subiendo imagen...</p>}
+                            </div>
+                        </div>
                     </div>
 
                     <div>
