@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, Mail, Lock } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import { API_URL } from '../lib/constants';
 
 function Login() {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ function Login() {
 
         try {
             // 1. Petición al Backend que creamos
-            const { data } = await axios.post('http://localhost:4000/api/user/login', {
+            const { data } = await axios.post(`${API_URL}/api/user/login`, {
                 email,
                 password
             });
