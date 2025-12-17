@@ -71,7 +71,7 @@ const Home = () => {
                                         Ver Productos
                                     </button>
                                 </Link>
-                                <Link to="/peluqueria">
+                                <Link to="/servicios">
                                     <button className="flex items-center px-8 py-4 bg-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-700 transition shadow-lg transform hover:-translate-y-1 border-2 border-transparent">
                                         <Scissors className="mr-2 h-5 w-5" />
                                         Solicitar Turno

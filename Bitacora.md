@@ -273,3 +273,11 @@ La función para crear tokens recibe 3 parámetros:
   - Diseño responsivo con Tailwind CSS, incluyendo sección "Hero" con imagen de fondo y grilla de valores.
   - Integración de `lucide-react` para iconografía.
   - Configuración de SEO básico con `react-helmet`.
+
+## 34. Página de Contacto
+- **Objetivo:** Facilitar la comunicación con los clientes mediante formulario y datos de ubicación.
+- **Implementación:**
+  - Creación de `Contact.jsx` adaptando el diseño previo a Tailwind CSS.
+  - Formulario funcional con redirección automática a WhatsApp pre-llenado.
+  - Integración de mapa (iframe) y lista de redes sociales/horarios.
+  - Diseño responsivo con animaciones suaves (`framer-motion`).
