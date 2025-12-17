@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import uploadImage from '../lib/uploadImage';
+import { API_URL } from '../lib/constants';
 
 
 const Services = () => {
@@ -42,7 +43,7 @@ const Services = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:4000/api/appointment', {
+            const response = await fetch(`${API_URL}/api/appointment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import ProductTable from './ProductTable';
 import ProductForm from '../../components/ProductForm';
 import { Calendar } from 'lucide-react';
 import { X, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { API_URL } from '../../lib/constants';
 
 
 const AppointmentsTab = () => {
@@ -21,7 +22,7 @@ const AppointmentsTab = () => {
     const fetchAppointments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:4000/api/appointment', {
+            const response = await fetch(`${API_URL}/api/appointment`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Search, FilterX, SlidersHorizontal, Package, Loader2 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { API_URL } from '../lib/constants';
 
 const Shop = () => {
     // 1. Estados
@@ -22,7 +23,7 @@ const Shop = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const { data } = await axios.get('http://localhost:4000/api/product');
+                const { data } = await axios.get(`${API_URL}/api/product`);
                 setProducts(data);
             } catch (error) {
                 console.error("Error cargando productos:", error);

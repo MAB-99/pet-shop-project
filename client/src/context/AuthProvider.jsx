@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../lib/constants';
 
 const AuthContext = createContext();
 
@@ -28,7 +29,7 @@ const AuthProvider = ({ children }) => {
 
             try {
                 // NOTA: Ruta en SINGULAR como pediste
-                const { data } = await axios.get('http://localhost:4000/api/user/perfil', config);
+                const { data } = await axios.get(`${API_URL}/api/user/perfil`, config);
                 setAuth(data); // Guardamos al usuario en el estado global
                 // Si estamos en login, redirigir al home (opcional)
             } catch (error) {

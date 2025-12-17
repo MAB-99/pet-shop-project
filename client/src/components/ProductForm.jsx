@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Save, X, ImageIcon, Loader2 } from 'lucide-react';
 import uploadImage from '../lib/uploadImage';
 import { Upload } from 'lucide-react';
+import { API_URL } from '../lib/constants';
 
 const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -69,11 +70,11 @@ const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
         try {
             if (productToEdit) {
                 // MODO EDICIÓN: PUT /api/product/:id
-                await axios.put(`http://localhost:4000/api/product/${productToEdit._id}`, formData, config);
+                await axios.put(`${API_URL}/api/product/${productToEdit._id}`, formData, config);
                 alert('Producto actualizado correctamente');
             } else {
                 // MODO CREACIÓN: POST /api/product
-                await axios.post('http://localhost:4000/api/product', formData, config);
+                await axios.post(`${API_URL}/api/product`, formData, config);
                 alert('Producto creado correctamente');
             }
             onSuccess(); // Avisar al padre que recargue la tabla
