@@ -4,7 +4,7 @@ import checkAuth from '../middleware/auth.Middleware.js';
 const router = express.Router();
 
 // Autenticación, Registro y Confirmación de Usuarios
-router.post('/registro', registrarUsuario);
+router.post('/', registrarUsuario);
 router.post('/login', autenticar);
 router.get('/perfil', checkAuth, perfil);
 

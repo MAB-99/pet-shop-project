@@ -114,7 +114,7 @@ function Login() {
                 {/* Footer */}
                 <div className="text-center text-sm">
                     <span className="text-gray-600">¿Nuevo aquí? </span>
-                    <Link to="/registro" className="font-bold text-blue-600 hover:underline">Crea una cuenta</Link>
+                    <Link to="/" className="font-bold text-blue-600 hover:underline">Crea una cuenta</Link>
                 </div>
             </div>
         </div>
