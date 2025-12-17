@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Edit, Trash2, Plus, AlertTriangle, Loader2 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import { API_URL } from '../../lib/constants';
 
 const ProductsTable = ({ onEdit }) => {
     const [products, setProducts] = useState([]);
@@ -11,7 +12,7 @@ const ProductsTable = ({ onEdit }) => {
     // 1. Cargar productos al iniciar
     const fetchProducts = async () => {
         try {
-            const { data } = await axios.get('http://localhost:4000/api/product');
+            const { data } = await axios.get(`${API_URL}/api/product`);
             setProducts(data);
         } catch (error) {
             console.error("Error cargando productos:", error);

@@ -290,3 +290,19 @@ La función para crear tokens recibe 3 parámetros:
   - Creación del helper utilitario `client/src/lib/uploadImage.js` para gestionar la petición a la API de Cloudinary.
   - **Admin (Productos):** Se modificó `ProductForm.jsx` para aceptar inputs de tipo `file`, mostrando una previsualización de la imagen y un estado de carga ("Subiendo...").
   - **Cliente (Servicios):** Se actualizó `Services.jsx` para que los usuarios puedan subir la foto de su mascota al solicitar un turno.
+
+## 36. Despliegue (Deploy) y Configuración de Producción
+- **Objetivo:** Publicar la aplicación en internet y asegurar que el Frontend se conecte al Backend correcto dinámicamente.
+- **Backend (Render):**
+  - Despliegue del servidor Node.js/Express en **Render**.
+  - Configuración de variables de entorno (`MONGO_URI`, `JWT_SECRET`) en la nube.
+  - Configuración de seguridad en **MongoDB Atlas** (Network Access) para permitir conexiones externas.
+- **Frontend (Vercel & Refactor):**
+  - Centralización de la URL de la API en `client/src/lib/constants.js` usando lógica condicional.
+  - Configuración de Variables de Entorno con `.env.production` (`VITE_BACKEND_URL`).
+  - **Refactorización Masiva:** Se reemplazaron todas las llamadas `fetch` harcodeadas (`localhost:4000`) por la constante dinámica `API_URL` en:
+    - `AuthProvider.jsx` (Autenticación)
+    - `Shop.jsx` (Tienda)
+    - `Services.jsx` (Turnos)
+    - `AdminDashboard.jsx` (Panel de Administración)
+    - `ProductForm.jsx` (Gestión de Productos)
