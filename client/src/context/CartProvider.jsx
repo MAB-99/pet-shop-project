@@ -1,4 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
+import { API_URL } from '../lib';
 
 const CartContext = createContext();
 
@@ -65,6 +67,41 @@ const CartProvider = ({ children }) => {
     const closeCart = () => setIsCartOpen(false);
     const openCart = () => setIsCartOpen(true);
 
+    // Función para iniciar el pago con MercadoPago
+    const handlePayment = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Debes iniciar sesión para pagar");
+                return;
+            }
+
+            // 1. Pedimos la preferencia al Backend
+            const response = await fetch(`${API_URL}/api/payment/create-preference`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ items: cart }) // Enviamos el carrito actual
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                // 2. Si todo sale bien, redirigimos a MercadoPago
+                window.location.href = data.url;
+            } else {
+                console.error("No se recibió la URL de pago", data);
+                alert("Error al generar el pago");
+            }
+
+        } catch (error) {
+            console.error("Error en pago:", error);
+            alert("Hubo un error al conectar con MercadoPago");
+        }
+    };
+
     return (
         <CartContext.Provider value={{
             cart,
@@ -77,7 +114,8 @@ const CartProvider = ({ children }) => {
             isCartOpen,
             toggleCart,
             closeCart,
-            openCart
+            openCart,
+            handlePayment
         }}>
             {children}
         </CartContext.Provider>

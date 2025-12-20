@@ -9,7 +9,7 @@ import { API_URL } from '../lib/constants'
 
 const CartDrawer = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart()
+    const { cart, removeFromCart, updateQuantity, total, clearCart, handlePayment } = useCart()
     const { auth } = useAuth();
 
     // Estados para el flujo de compra
@@ -213,10 +213,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
                                 {step === 'cart' ? (
                                     <button
-                                        onClick={handleCheckoutClick}
-                                        className="w-full bg-gray-900 text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition flex items-center justify-center gap-2"
+                                        onClick={handlePayment} // <--- AQUÍ LA CONEXIÓN
+                                        className="w-full bg-yellow-500 text-white py-3 rounded-lg font-bold text-lg hover:bg-yellow-600 transition-colors shadow-md mt-4 flex justify-center items-center gap-2"
                                     >
-                                        Iniciar Compra <ArrowRight className="h-4 w-4" />
+                                        <span>Pagar con MercadoPago</span>
+                                        {/* Icono opcional */}
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
                                     </button>
                                 ) : (
                                     <button

@@ -32,7 +32,10 @@ export const createPreference = async (req, res) => {
         const result = await preference.create({ body });
 
         // 4. Devolver el ID de la preferencia al Frontend
-        res.json({ id: result.id });
+        res.json({
+            id: result.id,
+            url: result.body.init_point
+        });
 
     } catch (error) {
         console.error("Error creating preference:", error);

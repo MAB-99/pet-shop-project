@@ -316,3 +316,14 @@ La función para crear tokens recibe 3 parámetros:
   - Creación de `vercel.json` con reglas de *rewrite* para solucionar el error 404 al recargar páginas internas (SPA Routing).
   - **Limpieza de Código:** Se eliminaron todas las referencias residuales a `localhost:4000` en `CartProvider`, `AdminDashboard` y `Register`, reemplazándolas por la variable de entorno dinámica.
   - Implementación de la página de Registro de usuarios (`Register.jsx`) que había quedado pendiente.
+
+## 38. Integración de Pasarela de Pagos (MercadoPago)
+- **Objetivo:** Permitir a los usuarios realizar compras reales (simuladas en Sandbox) utilizando MercadoPago.
+- **Backend:**
+  - Instalación y configuración del SDK de `mercadopago`.
+  - Creación del controlador `paymentController.js` para generar preferencias de pago.
+  - Endpoint `/api/payment/create-preference` que recibe el carrito y devuelve la URL de pago (`init_point`).
+- **Frontend:**
+  - Implementación de la función `handlePayment` en `CartProvider` para comunicar con el backend y gestionar la redirección.
+  - Conexión del botón "Pagar con MercadoPago" en `CartDrawer.jsx` para iniciar el flujo de compra.
+  - Configuración de `back_urls` para que el usuario regrese a la tienda tras finalizar (éxito/fallo).
