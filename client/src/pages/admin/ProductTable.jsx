@@ -36,7 +36,7 @@ const ProductsTable = ({ onEdit }) => {
                 }
             };
             // OJO: Usamos singular /api/product/:id
-            await axios.delete(`http://localhost:4000/api/product/${id}`, config);
+            await axios.delete(`${API_URL}/api/product/${id}`, config);
 
             // Actualizamos la lista visualmente filtrando el que borramos
             setProducts(products.filter(p => p._id !== id));

@@ -30,7 +30,7 @@ const Profile = () => {
                 };
                 // NOTA: Asumimos que creamos esta ruta en el backend. 
                 // Si falla, la crearemos en el siguiente paso.
-                const { data } = await axios.get('http://localhost:4000/api/order/myorders', config);
+                const { data } = await axios.get(`${API_URL}/api/order/myorders`, config);
                 setOrders(data);
             } catch (error) {
                 console.error("Error cargando órdenes:", error);
