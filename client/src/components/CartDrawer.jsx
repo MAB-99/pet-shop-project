@@ -5,6 +5,7 @@ import { X, ShoppingCart, Trash2, Plus, Minus, ArrowRight, Loader2 } from 'lucid
 import axios from 'axios';
 import useCart from '../hooks/useCart';
 import useAuth from '../hooks/useAuth';
+import { API_URL } from '../config';
 
 const CartDrawer = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
@@ -69,7 +70,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
         };
 
         try {
-            const { data } = await axios.post('http://localhost:4000/api/order', orderData, config);
+            const { data } = await axios.post(`${API_URL}/api/order`, orderData, config);
             console.log("Orden Creada:", data);
 
             alert(`¡Gracias ${auth.name}! Tu orden #${data._id} fue recibida.`);

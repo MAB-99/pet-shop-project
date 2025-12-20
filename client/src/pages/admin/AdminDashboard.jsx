@@ -54,7 +54,7 @@ const AppointmentsTab = () => {
             const body = { status: newStatus };
             if (date) body.confirmedDate = date;
 
-            const response = await fetch(`http://localhost:4000/api/appointment/${id}/status`, {
+            const response = await fetch(`${API_URL}/api/appointment/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
