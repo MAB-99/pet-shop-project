@@ -327,3 +327,11 @@ La función para crear tokens recibe 3 parámetros:
   - Implementación de la función `handlePayment` en `CartProvider` para comunicar con el backend y gestionar la redirección.
   - Conexión del botón "Pagar con MercadoPago" en `CartDrawer.jsx` para iniciar el flujo de compra.
   - Configuración de `back_urls` para que el usuario regrese a la tienda tras finalizar (éxito/fallo).
+
+## 39. Optimización del Flujo de Compra (Checkout Dual)
+- **Objetivo:** Ofrecer al usuario flexibilidad para elegir entre pago online (MercadoPago) o pago manual (Efectivo/A convenir) dentro del mismo carrito.
+- **Frontend (`CartDrawer.jsx`):**
+  - **Reestructuración de UI:** Se implementó un sistema de "pasos" (`step`: 'cart' vs 'checkout') para navegar dentro del panel lateral sin salir de la tienda.
+  - **Integración MercadoPago:** Botón dedicado que conecta con el endpoint `/create-preference` y redirige a la pasarela segura.
+  - **Flujo Manual:** Formulario de datos de envío integrado para pedidos en efectivo, conectando con el endpoint estándar de creación de órdenes.
+  - Mejoras visuales con iconos (`lucide-react`) y transiciones suaves (`framer-motion`).

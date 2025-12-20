@@ -1,22 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingCart, Trash2, Plus, Minus, ArrowRight, Loader2 } from 'lucide-react';
+import { X, ShoppingCart, Trash2, Loader2, CreditCard, Banknote } from 'lucide-react';
 import axios from 'axios';
 import useCart from '../hooks/useCart';
 import useAuth from '../hooks/useAuth';
-import { API_URL } from '../lib/constants'
+import { API_URL } from '../lib/constants';
 
 const CartDrawer = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const { cart, removeFromCart, updateQuantity, total, clearCart, handlePayment } = useCart()
+    const { cart, removeFromCart, updateQuantity, total, clearCart, handlePayment } = useCart();
     const { auth } = useAuth();
 
     // Estados para el flujo de compra
-    const [step, setStep] = useState('cart'); // 'cart' | 'checkout'
+    const [step, setStep] = useState('cart'); // 'cart' | 'checkout' (manual)
     const [loading, setLoading] = useState(false);
 
-    // Formulario de Envío (Coincide con tu Schema de Mongoose)
+    // Formulario de Envío (Para pago manual/efectivo)
     const [formData, setFormData] = useState({
         address: '',
         city: 'Córdoba',
@@ -29,10 +29,10 @@ const CartDrawer = ({ isOpen, onClose }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // 2. Iniciar Proceso de Pago
-    const handleCheckoutClick = () => {
+    // 2. Iniciar pago manual (Cambia de vista al formulario)
+    const handleManualCheckoutClick = () => {
         if (!auth._id) {
-            alert("Debes iniciar sesión para realizar una compra");
+            alert("Debes iniciar sesión para comprar");
             onClose();
             navigate('/login');
             return;
@@ -40,44 +40,42 @@ const CartDrawer = ({ isOpen, onClose }) => {
         setStep('checkout');
     };
 
-    // 3. Enviar Orden al Backend
-    const handleSubmitOrder = async (e) => {
+    // 3. Enviar Orden Manual al Backend (Efectivo)
+    const handleSubmitManualOrder = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        // Preparamos los datos tal cual los pide tu Backend (OrderController)
         const orderData = {
             orderItems: cart.map(item => ({
-                product: item._id, // ID del producto
+                product: item._id,
                 name: item.name,
                 image: item.image,
                 price: item.price,
                 qty: item.quantity
             })),
             shippingAddress: formData,
-            paymentMethod: 'Efectivo', // Hardcodeado por ahora, luego puedes agregar selector
+            paymentMethod: 'Efectivo',
             itemsPrice: total,
             taxPrice: 0,
             shippingPrice: 0,
             totalPrice: total
         };
 
-        const config = {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem('token')}` // Token JWT
-            }
-        };
-
         try {
-            const { data } = await axios.post(`${API_URL}/api/order`, orderData, config);
-            console.log("Orden Creada:", data);
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            };
 
-            alert(`¡Gracias ${auth.name}! Tu orden #${data._id} fue recibida.`);
+            const { data } = await axios.post(`${API_URL}/api/order`, orderData, config);
+
+            alert(`¡Orden #${data._id} creada con éxito! Nos contactaremos para el envío.`);
             clearCart();
             setStep('cart');
             onClose();
-            // navigate('/perfil'); // Futuro: Redirigir al historial
+
         } catch (error) {
             console.error(error);
             alert("Error al procesar la orden: " + (error.response?.data?.msg || error.message));
@@ -111,14 +109,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         <div className="flex items-center justify-between p-4 border-b bg-yellow-50">
                             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                 <ShoppingCart className="h-5 w-5 text-yellow-700" />
-                                {step === 'cart' ? 'Tu Carrito' : 'Finalizar Compra'}
+                                {step === 'cart' ? 'Tu Carrito' : 'Datos de Envío'}
                             </h2>
                             <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition">
                                 <X className="h-5 w-5 text-gray-500" />
                             </button>
                         </div>
 
-                        {/* BODY */}
+                        {/* BODY SCROLLABLE */}
                         <div className="flex-1 overflow-y-auto p-4">
 
                             {/* VISTA 1: LISTA DE PRODUCTOS */}
@@ -140,13 +138,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                         <p className="text-yellow-700 font-bold">${item.price}</p>
 
                                                         {/* Controles Cantidad */}
-                                                        <div className="flex items-center gap-3 mt-2">
-                                                            <div className="flex items-center border rounded-md">
+                                                        <div className="flex items-center justify-between mt-2">
+                                                            <div className="flex items-center border rounded-md bg-white">
                                                                 <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className="px-2 py-1 hover:bg-gray-100 text-gray-600">-</button>
                                                                 <span className="px-2 text-sm font-medium">{item.quantity}</span>
                                                                 <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className="px-2 py-1 hover:bg-gray-100 text-gray-600">+</button>
                                                             </div>
-                                                            <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600">
+                                                            <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 p-1">
                                                                 <Trash2 className="h-4 w-4" />
                                                             </button>
                                                         </div>
@@ -158,11 +156,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                 </>
                             )}
 
-                            {/* VISTA 2: FORMULARIO CHECKOUT */}
+                            {/* VISTA 2: FORMULARIO CHECKOUT (Solo para manual) */}
                             {step === 'checkout' && (
-                                <form id="checkout-form" onSubmit={handleSubmitOrder} className="space-y-4">
-                                    <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 mb-4">
-                                        Vas a comprar <strong>{cart.length} productos</strong> por un total de <strong>${total}</strong>.
+                                <form id="manual-checkout-form" onSubmit={handleSubmitManualOrder} className="space-y-4">
+                                    <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 mb-4 border border-blue-100">
+                                        <p className="font-bold flex items-center gap-2"><Banknote className="w-4 h-4" /> Pago en Efectivo</p>
+                                        Completá tus datos. Coordinaremos el pago al momento de la entrega.
                                     </div>
 
                                     <div>
@@ -192,40 +191,58 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                             />
                                         </div>
                                     </div>
+
                                     <button
                                         type="button"
                                         onClick={() => setStep('cart')}
-                                        className="text-sm text-gray-500 hover:underline"
+                                        className="text-sm text-gray-500 hover:underline w-full text-center mt-4"
                                     >
-                                        &larr; Volver al carrito
+                                        &larr; Volver a elegir método de pago
                                     </button>
                                 </form>
                             )}
                         </div>
 
-                        {/* FOOTER */}
+                        {/* FOOTER - ACCIONES */}
                         {cart.length > 0 && (
-                            <div className="p-4 border-t bg-gray-50">
-                                <div className="flex justify-between items-center mb-4 text-lg font-bold text-gray-900">
+                            <div className="p-4 border-t bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                                <div className="flex justify-between items-center mb-4 text-xl font-bold text-gray-900">
                                     <span>Total:</span>
                                     <span>${total}</span>
                                 </div>
 
                                 {step === 'cart' ? (
-                                    <button
-                                        onClick={handlePayment} // <--- AQUÍ LA CONEXIÓN
-                                        className="w-full bg-yellow-500 text-white py-3 rounded-lg font-bold text-lg hover:bg-yellow-600 transition-colors shadow-md mt-4 flex justify-center items-center gap-2"
-                                    >
-                                        <span>Pagar con MercadoPago</span>
-                                        {/* Icono opcional */}
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                    </button>
+                                    <div className="space-y-3">
+                                        {/* OPCIÓN 1: MERCADO PAGO */}
+                                        <button
+                                            onClick={handlePayment}
+                                            className="w-full bg-[#009EE3] hover:bg-[#008ED6] text-white py-3 rounded-lg font-bold text-lg transition-colors shadow-sm flex justify-center items-center gap-2"
+                                        >
+                                            <span>Pagar con MercadoPago</span>
+                                            <CreditCard className="w-5 h-5" />
+                                        </button>
+
+                                        {/* SEPARADOR */}
+                                        <div className="relative flex py-1 items-center">
+                                            <div className="flex-grow border-t border-gray-200"></div>
+                                            <span className="flex-shrink-0 mx-2 text-gray-400 text-xs">O</span>
+                                            <div className="flex-grow border-t border-gray-200"></div>
+                                        </div>
+
+                                        {/* OPCIÓN 2: PAGO MANUAL / EFECTIVO */}
+                                        <button
+                                            onClick={handleManualCheckoutClick}
+                                            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-bold text-sm transition-colors flex justify-center items-center gap-2"
+                                        >
+                                            <span>Pago en Efectivo / A convenir</span>
+                                            <Banknote className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 ) : (
+                                    /* BOTÓN CONFIRMAR MANUAL */
                                     <button
                                         type="submit"
-                                        form="checkout-form"
+                                        form="manual-checkout-form"
                                         disabled={loading}
                                         className="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
