@@ -241,7 +241,7 @@ const OverviewTab = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:4000/api/order/stats', {
+                const response = await fetch(`${API_URL}/api/order/stats`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -349,7 +349,7 @@ const OrdersTab = () => {
             const token = localStorage.getItem('token'); // O auth.token, depende donde lo guardes
             if (!token) return;
 
-            const response = await fetch('http://localhost:4000/api/order', {
+            const response = await fetch(`${API_URL}/api/order`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -368,7 +368,7 @@ const OrdersTab = () => {
     const handleStatusChange = async (orderId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:4000/api/order/${orderId}/status`, {
+            const response = await fetch(`${API_URL}/api/order/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
