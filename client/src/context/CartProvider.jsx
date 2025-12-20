@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_URL } from '../lib';
+import { API_URL } from '../lib/constants';
 
 const CartContext = createContext();
 
