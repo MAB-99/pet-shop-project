@@ -306,3 +306,13 @@ La función para crear tokens recibe 3 parámetros:
     - `Services.jsx` (Turnos)
     - `AdminDashboard.jsx` (Panel de Administración)
     - `ProductForm.jsx` (Gestión de Productos)
+
+## 37. Correcciones Post-Despliegue y Optimización
+- **Objetivo:** Solucionar errores de conexión y navegación detectados en el entorno de producción (Vercel/Render).
+- **Backend & Base de Datos:**
+  - Resolución de errores de conexión MongoDB (`ECONNREFUSED` y `whitelisted IP`) configurando correctamente el Network Access en Atlas.
+  - Actualización de credenciales de base de datos para evitar conflictos con caracteres especiales.
+- **Frontend:**
+  - Creación de `vercel.json` con reglas de *rewrite* para solucionar el error 404 al recargar páginas internas (SPA Routing).
+  - **Limpieza de Código:** Se eliminaron todas las referencias residuales a `localhost:4000` en `CartProvider`, `AdminDashboard` y `Register`, reemplazándolas por la variable de entorno dinámica.
+  - Implementación de la página de Registro de usuarios (`Register.jsx`) que había quedado pendiente.
