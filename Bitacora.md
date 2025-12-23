@@ -335,3 +335,14 @@ La función para crear tokens recibe 3 parámetros:
   - **Integración MercadoPago:** Botón dedicado que conecta con el endpoint `/create-preference` y redirige a la pasarela segura.
   - **Flujo Manual:** Formulario de datos de envío integrado para pedidos en efectivo, conectando con el endpoint estándar de creación de órdenes.
   - Mejoras visuales con iconos (`lucide-react`) y transiciones suaves (`framer-motion`).
+
+## 40. Verificación y Testing de Pagos (Sandbox)
+- **Hito:** Se completó exitosamente el flujo de compra real (modo prueba) con MercadoPago.
+- **Solución de Errores:**
+  - Se resolvió el error `500 Internal Server Error` verificando las credenciales en Render.
+  - Se resolvió el error de "Collector is a production user" utilizando **Cuentas de Prueba (Test Users)** y navegación en modo incógnito para separar la sesión del vendedor de la del comprador.
+- **Estado Actual:** La aplicación permite:
+  1. Login/Registro de usuarios.
+  2. Agregar productos al carrito.
+  3. Elegir entre Pagar Online (MP) o Efectivo.
+  4. Procesar la transacción y vaciar el carrito post-compra.
