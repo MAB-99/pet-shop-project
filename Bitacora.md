@@ -356,6 +356,6 @@ La función para crear tokens recibe 3 parámetros:
   - Refactorización completa: Ahora el componente es "consciente" del carrito (`availableStock = stock - inCartQuantity`).
   - Feedback visual:
     - Botón deshabilitado si se alcanza el límite.
-    - Badges dinámicos ("Agotado", "Máximo Alcanzado", "En Carrito").
+    - Badges dinámicos ("Agotado", "Máximo Alcanzado", "En Carrito"). 
     - Contador bloqueado para no superar el disponible real.
 - **Resultado:** Eliminación de inconsistencias entre la tienda y el carrito visual.
