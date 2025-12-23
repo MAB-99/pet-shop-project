@@ -1,71 +1,75 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import { API_URL } from '../lib/constants';
 
 const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
-    // 1. Estado del Carrito (Productos)
+    // Inicializar carrito desde localStorage
     const [cart, setCart] = useState(() => {
         const savedCart = localStorage.getItem('cart');
         return savedCart ? JSON.parse(savedCart) : [];
     });
 
     const [total, setTotal] = useState(0);
-    const [itemsCount, setItemsCount] = useState(0);
 
-    // 2. Estado de Visibilidad (Abrir/Cerrar Drawer)
-    const [isCartOpen, setIsCartOpen] = useState(false);
-
-    // Efecto para calcular totales
+    // Guardar en localStorage cada vez que cambie el carrito
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
-        const nuevoTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        setTotal(nuevoTotal);
-        const nuevoCount = cart.reduce((acc, item) => acc + item.quantity, 0);
-        setItemsCount(nuevoCount);
+        const newTotal = cart.reduce((acc, item) => acc + (Number(item.price) * item.quantity), 0);
+        setTotal(newTotal);
     }, [cart]);
 
-    // --- FUNCIONES ---
+    // --- FUNCIÓN AGREGAR CON VALIDACIÓN DE STOCK ---
+    const addToCart = (product) => {
+        // 1. Validar si hay stock inicial
+        if (product.stock <= 0) {
+            alert("Lo sentimos, este producto está agotado.");
+            return;
+        }
 
-    const addToCart = (product, quantity = 1) => {
-        setCart(prevCart => {
-            const itemExists = prevCart.find(item => item._id === product._id);
-            if (itemExists) {
-                return prevCart.map(item =>
-                    item._id === product._id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
-                );
-            } else {
-                return [...prevCart, { ...product, quantity }];
+        const existingItem = cart.find(item => item._id === product._id);
+
+        if (existingItem) {
+            // 2. Validar si al sumar 1 superamos el stock
+            if (existingItem.quantity + 1 > product.stock) {
+                alert(`¡Máximo stock alcanzado! Solo quedan ${product.stock} unidades de ${product.name}.`);
+                return;
             }
-        });
-        // Opcional: Abrir el carrito automáticamente al agregar
-        setIsCartOpen(true);
+
+            setCart(cart.map(item =>
+                item._id === product._id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            ));
+        } else {
+            setCart([...cart, { ...product, quantity: 1 }]);
+        }
     };
 
     const removeFromCart = (id) => {
-        setCart(prevCart => prevCart.filter(item => item._id !== id));
+        setCart(cart.filter(item => item._id !== id));
     };
 
+    // --- FUNCIÓN ACTUALIZAR CANTIDAD CON VALIDACIÓN ---
     const updateQuantity = (id, newQuantity) => {
         if (newQuantity < 1) return;
-        setCart(prevCart =>
-            prevCart.map(item =>
-                item._id === id ? { ...item, quantity: newQuantity } : item
-            )
-        );
+
+        // Buscamos el item para chequear su stock máximo
+        const item = cart.find(i => i._id === id);
+
+        if (item && newQuantity > item.stock) {
+            alert(`No puedes agregar más. Stock máximo disponible: ${item.stock}`);
+            return; // No actualizamos si se pasa
+        }
+
+        setCart(cart.map(item =>
+            item._id === id ? { ...item, quantity: newQuantity } : item
+        ));
     };
 
     const clearCart = () => {
         setCart([]);
     };
-
-    // Funciones para manejar la visibilidad
-    const toggleCart = () => setIsCartOpen(!isCartOpen);
-    const closeCart = () => setIsCartOpen(false);
-    const openCart = () => setIsCartOpen(true);
 
     // Función para iniciar el pago con MercadoPago
     const handlePayment = async () => {
@@ -76,20 +80,18 @@ const CartProvider = ({ children }) => {
                 return;
             }
 
-            // 1. Pedimos la preferencia al Backend
             const response = await fetch(`${API_URL}/api/payment/create-preference`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ items: cart }) // Enviamos el carrito actual
+                body: JSON.stringify({ items: cart })
             });
 
             const data = await response.json();
 
             if (data.url) {
-                // 2. Si todo sale bien, redirigimos a MercadoPago
                 window.location.href = data.url;
             } else {
                 console.error("No se recibió la URL de pago", data);
@@ -105,16 +107,11 @@ const CartProvider = ({ children }) => {
     return (
         <CartContext.Provider value={{
             cart,
-            total,
-            itemsCount,
             addToCart,
             removeFromCart,
             updateQuantity,
             clearCart,
-            isCartOpen,
-            toggleCart,
-            closeCart,
-            openCart,
+            total,
             handlePayment
         }}>
             {children}

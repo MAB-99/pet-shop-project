@@ -138,16 +138,33 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                         <p className="text-yellow-700 font-bold">${item.price}</p>
 
                                                         {/* Controles Cantidad */}
-                                                        <div className="flex items-center justify-between mt-2">
-                                                            <div className="flex items-center border rounded-md bg-white">
-                                                                <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className="px-2 py-1 hover:bg-gray-100 text-gray-600">-</button>
-                                                                <span className="px-2 text-sm font-medium">{item.quantity}</span>
-                                                                <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className="px-2 py-1 hover:bg-gray-100 text-gray-600">+</button>
-                                                            </div>
-                                                            <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 p-1">
-                                                                <Trash2 className="h-4 w-4" />
+                                                        <div className="flex items-center border rounded-md bg-white">
+                                                            {/* Botón MENOS */}
+                                                            <button
+                                                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                                                className="px-2 py-1 hover:bg-gray-100 text-gray-600 disabled:opacity-30"
+                                                                disabled={item.quantity <= 1} // Evitar 0 o negativos
+                                                            >
+                                                                -
+                                                            </button>
+
+                                                            <span className="px-2 text-sm font-medium">{item.quantity}</span>
+
+                                                            {/* Botón MÁS (Validado) */}
+                                                            <button
+                                                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                                                className="px-2 py-1 hover:bg-gray-100 text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                                                                disabled={item.quantity >= item.stock} // <--- ESTA ES LA CLAVE
+                                                            >
+                                                                +
                                                             </button>
                                                         </div>
+                                                        <div className="text-xs text-gray-400 text-right mt-1 px-1">
+                                                            (Disp: {item.stock})
+                                                        </div>
+                                                        <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 p-1">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -253,8 +270,9 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         )}
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 };
 

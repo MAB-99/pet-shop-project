@@ -346,3 +346,16 @@ La función para crear tokens recibe 3 parámetros:
   2. Agregar productos al carrito.
   3. Elegir entre Pagar Online (MP) o Efectivo.
   4. Procesar la transacción y vaciar el carrito post-compra.
+
+## 41. Control de Stock Inteligente (Frontend)
+- **Objetivo:** Impedir que un usuario agregue al carrito más unidades de las disponibles en inventario (Issue #3).
+- **Implementación Global (`CartProvider`):**
+  - Se blindaron las funciones `addToCart` y `updateQuantity` para validar contra `product.stock` antes de modificar el estado.
+  - Se agregaron alertas nativas para informar al usuario cuando intenta exceder el límite.
+- **Implementación UI (`ProductCard`):**
+  - Refactorización completa: Ahora el componente es "consciente" del carrito (`availableStock = stock - inCartQuantity`).
+  - Feedback visual:
+    - Botón deshabilitado si se alcanza el límite.
+    - Badges dinámicos ("Agotado", "Máximo Alcanzado", "En Carrito").
+    - Contador bloqueado para no superar el disponible real.
+- **Resultado:** Eliminación de inconsistencias entre la tienda y el carrito visual.
