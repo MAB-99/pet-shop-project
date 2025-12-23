@@ -20,9 +20,9 @@ export const createPreference = async (req, res) => {
                 quantity: Number(item.quantity),
             })),
             back_urls: {
-                success: "https://tupagina.vercel.app/tienda", // A dónde vuelve si sale bien
-                failure: "https://tupagina.vercel.app/tienda",
-                pending: "https://tupagina.vercel.app/tienda",
+                success: "https://pet-shop-project-nine.vercel.app/", // A dónde vuelve si sale bien
+                failure: "https://pet-shop-project-nine.vercel.app/",
+                pending: "https://pet-shop-project-nine.vercel.app/",
             },
             auto_return: "approved",
         };
@@ -38,7 +38,17 @@ export const createPreference = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error creating preference:", error);
-        res.status(500).json({ error: "Error al crear la preferencia de pago" });
+        // --- AGREGA ESTOS LOGS PARA VER EL ERROR EN RENDER ---
+        console.error("❌ ERROR MERCADOPAGO DETALLADO:");
+        console.error(error);
+        console.error("Mensaje:", error.message);
+        if (error.cause) console.error("Causa:", error.cause);
+        // -----------------------------------------------------
+
+        // Devolvemos el error real al frontend para que tú lo veas en la alerta (solo para desarrollo)
+        res.status(500).json({
+            error: "Error al crear pago",
+            details: error.message
+        });
     }
 };
