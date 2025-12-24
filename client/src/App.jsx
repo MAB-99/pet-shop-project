@@ -21,7 +21,6 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <CartDrawer />
-        <Header />
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
