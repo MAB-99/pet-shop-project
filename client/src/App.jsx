@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthProvider';
 import { CartProvider } from './context/CartProvider';
 import MainLayout from './layout/MainLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import CartDrawer from './components/CartDrawer';
+import Header from './components/Header';
 
 // PÁGINAS
 import Login from './pages/Login';
@@ -18,6 +20,8 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <CartDrawer />
+        <Header />
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />

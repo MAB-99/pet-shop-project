@@ -7,16 +7,17 @@ import useCart from '../hooks/useCart';
 import useAuth from '../hooks/useAuth';
 import { API_URL } from '../lib/constants';
 
-const CartDrawer = ({ isOpen, onClose }) => {
+// CAMBIO 1: Ya no recibe props ({ isOpen, onClose })
+const CartDrawer = () => {
+
     const navigate = useNavigate();
-    const { cart, removeFromCart, updateQuantity, total, clearCart, handlePayment } = useCart();
+    // CAMBIO 2: Traemos isCartOpen y closeCart del contexto
+    const { cart, removeFromCart, updateQuantity, total, clearCart, handlePayment, isCartOpen, closeCart } = useCart();
     const { auth } = useAuth();
 
-    // Estados para el flujo de compra
-    const [step, setStep] = useState('cart'); // 'cart' | 'checkout' (manual)
+    const [step, setStep] = useState('cart');
     const [loading, setLoading] = useState(false);
 
-    // Formulario de Envío (Para pago manual/efectivo)
     const [formData, setFormData] = useState({
         address: '',
         city: 'Córdoba',
@@ -24,23 +25,21 @@ const CartDrawer = ({ isOpen, onClose }) => {
         country: 'Argentina'
     });
 
-    // 1. Manejar cambios en el formulario
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // 2. Iniciar pago manual (Cambia de vista al formulario)
     const handleManualCheckoutClick = () => {
         if (!auth._id) {
             alert("Debes iniciar sesión para comprar");
-            onClose();
+            // Usamos closeCart del contexto
+            closeCart();
             navigate('/login');
             return;
         }
         setStep('checkout');
     };
 
-    // 3. Enviar Orden Manual al Backend (Efectivo)
     const handleSubmitManualOrder = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -68,13 +67,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             };
-
             const { data } = await axios.post(`${API_URL}/api/order`, orderData, config);
 
             alert(`¡Orden #${data._id} creada con éxito! Nos contactaremos para el envío.`);
             clearCart();
             setStep('cart');
-            onClose();
+            // Usamos closeCart del contexto
+            closeCart();
 
         } catch (error) {
             console.error(error);
@@ -86,18 +85,17 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
     return (
         <AnimatePresence>
-            {isOpen && (
+            {/* CAMBIO 3: Usamos isCartOpen del contexto */}
+            {isCartOpen && (
                 <>
-                    {/* Backdrop Oscuro */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={closeCart} // Usamos closeCart
                         className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
                     />
 
-                    {/* Drawer (Panel Lateral) */}
                     <motion.div
                         initial={{ x: '100%' }}
                         animate={{ x: 0 }}
@@ -105,28 +103,25 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
                     >
-                        {/* HEADER */}
                         <div className="flex items-center justify-between p-4 border-b bg-yellow-50">
                             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                                 <ShoppingCart className="h-5 w-5 text-yellow-700" />
                                 {step === 'cart' ? 'Tu Carrito' : 'Datos de Envío'}
                             </h2>
-                            <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition">
+                            <button onClick={closeCart} className="p-2 hover:bg-white rounded-full transition">
                                 <X className="h-5 w-5 text-gray-500" />
                             </button>
                         </div>
 
-                        {/* BODY SCROLLABLE */}
+                        {/* ... El resto del contenido sigue igual ... */}
                         <div className="flex-1 overflow-y-auto p-4">
-
-                            {/* VISTA 1: LISTA DE PRODUCTOS */}
                             {step === 'cart' && (
                                 <>
                                     {cart.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-4">
                                             <ShoppingCart className="h-16 w-16 opacity-20" />
                                             <p>Tu carrito está vacío</p>
-                                            <button onClick={onClose} className="text-yellow-600 hover:underline">Ir a la tienda</button>
+                                            <button onClick={closeCart} className="text-yellow-600 hover:underline">Ir a la tienda</button>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
@@ -136,25 +131,19 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                                     <div className="flex-1">
                                                         <h3 className="font-semibold text-gray-800 line-clamp-1">{item.name}</h3>
                                                         <p className="text-yellow-700 font-bold">${item.price}</p>
-
-                                                        {/* Controles Cantidad */}
                                                         <div className="flex items-center border rounded-md bg-white">
-                                                            {/* Botón MENOS */}
                                                             <button
                                                                 onClick={() => updateQuantity(item._id, item.quantity - 1)}
                                                                 className="px-2 py-1 hover:bg-gray-100 text-gray-600 disabled:opacity-30"
-                                                                disabled={item.quantity <= 1} // Evitar 0 o negativos
+                                                                disabled={item.quantity <= 1}
                                                             >
                                                                 -
                                                             </button>
-
                                                             <span className="px-2 text-sm font-medium">{item.quantity}</span>
-
-                                                            {/* Botón MÁS (Validado) */}
                                                             <button
                                                                 onClick={() => updateQuantity(item._id, item.quantity + 1)}
                                                                 className="px-2 py-1 hover:bg-gray-100 text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                                                                disabled={item.quantity >= item.stock} // <--- ESTA ES LA CLAVE
+                                                                disabled={item.quantity >= item.stock}
                                                             >
                                                                 +
                                                             </button>
@@ -173,14 +162,12 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                 </>
                             )}
 
-                            {/* VISTA 2: FORMULARIO CHECKOUT (Solo para manual) */}
                             {step === 'checkout' && (
                                 <form id="manual-checkout-form" onSubmit={handleSubmitManualOrder} className="space-y-4">
                                     <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 mb-4 border border-blue-100">
                                         <p className="font-bold flex items-center gap-2"><Banknote className="w-4 h-4" /> Pago en Efectivo</p>
                                         Completá tus datos. Coordinaremos el pago al momento de la entrega.
                                     </div>
-
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Dirección de Entrega</label>
                                         <input
@@ -208,7 +195,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                             />
                                         </div>
                                     </div>
-
                                     <button
                                         type="button"
                                         onClick={() => setStep('cart')}
@@ -220,17 +206,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             )}
                         </div>
 
-                        {/* FOOTER - ACCIONES */}
                         {cart.length > 0 && (
                             <div className="p-4 border-t bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                                 <div className="flex justify-between items-center mb-4 text-xl font-bold text-gray-900">
                                     <span>Total:</span>
                                     <span>${total}</span>
                                 </div>
-
                                 {step === 'cart' ? (
                                     <div className="space-y-3">
-                                        {/* OPCIÓN 1: MERCADO PAGO */}
                                         <button
                                             onClick={handlePayment}
                                             className="w-full bg-[#009EE3] hover:bg-[#008ED6] text-white py-3 rounded-lg font-bold text-lg transition-colors shadow-sm flex justify-center items-center gap-2"
@@ -238,15 +221,11 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                             <span>Pagar con MercadoPago</span>
                                             <CreditCard className="w-5 h-5" />
                                         </button>
-
-                                        {/* SEPARADOR */}
                                         <div className="relative flex py-1 items-center">
                                             <div className="flex-grow border-t border-gray-200"></div>
                                             <span className="flex-shrink-0 mx-2 text-gray-400 text-xs">O</span>
                                             <div className="flex-grow border-t border-gray-200"></div>
                                         </div>
-
-                                        {/* OPCIÓN 2: PAGO MANUAL / EFECTIVO */}
                                         <button
                                             onClick={handleManualCheckoutClick}
                                             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-bold text-sm transition-colors flex justify-center items-center gap-2"
@@ -256,7 +235,6 @@ const CartDrawer = ({ isOpen, onClose }) => {
                                         </button>
                                     </div>
                                 ) : (
-                                    /* BOTÓN CONFIRMAR MANUAL */
                                     <button
                                         type="submit"
                                         form="manual-checkout-form"
@@ -270,9 +248,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
                         )}
                     </motion.div>
                 </>
-            )
-            }
-        </AnimatePresence >
+            )}
+        </AnimatePresence>
     );
 };
 

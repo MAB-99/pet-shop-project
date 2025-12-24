@@ -359,3 +359,8 @@ La función para crear tokens recibe 3 parámetros:
     - Badges dinámicos ("Agotado", "Máximo Alcanzado", "En Carrito"). 
     - Contador bloqueado para no superar el disponible real.
 - **Resultado:** Eliminación de inconsistencias entre la tienda y el carrito visual.
+
+## 42. Globalización del Estado del Carrito (UI Fix)  
+- **Problema Detectado:** El botón del carrito en el `Header` no desplegaba el menú lateral porque no había comunicación entre componentes hermanos.
+- **Solución Arquitectónica:** Se migró el control de visibilidad (`isOpen`) al Contexto Global (`CartProvider`).
+- **Cambios Realizados:**

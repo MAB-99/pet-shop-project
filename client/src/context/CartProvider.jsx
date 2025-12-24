@@ -12,6 +12,9 @@ const CartProvider = ({ children }) => {
 
     const [total, setTotal] = useState(0);
 
+    // --- 1. NUEVO: Estado para abrir/cerrar el carrito ---
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
     // Guardar en localStorage cada vez que cambie el carrito
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -19,9 +22,16 @@ const CartProvider = ({ children }) => {
         setTotal(newTotal);
     }, [cart]);
 
+    // --- 2. NUEVO: Calcular cantidad total de items (para el numerito rojo del Header) ---
+    const itemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    // --- 3. NUEVO: Funciones para controlar el menú ---
+    const toggleCart = () => setIsCartOpen(!isCartOpen);
+    const closeCart = () => setIsCartOpen(false);
+    const openCart = () => setIsCartOpen(true);
+
     // --- FUNCIÓN AGREGAR CON VALIDACIÓN DE STOCK ---
     const addToCart = (product) => {
-        // 1. Validar si hay stock inicial
         if (product.stock <= 0) {
             alert("Lo sentimos, este producto está agotado.");
             return;
@@ -30,12 +40,10 @@ const CartProvider = ({ children }) => {
         const existingItem = cart.find(item => item._id === product._id);
 
         if (existingItem) {
-            // 2. Validar si al sumar 1 superamos el stock
             if (existingItem.quantity + 1 > product.stock) {
                 alert(`¡Máximo stock alcanzado! Solo quedan ${product.stock} unidades de ${product.name}.`);
                 return;
             }
-
             setCart(cart.map(item =>
                 item._id === product._id
                     ? { ...item, quantity: item.quantity + 1 }
@@ -44,24 +52,21 @@ const CartProvider = ({ children }) => {
         } else {
             setCart([...cart, { ...product, quantity: 1 }]);
         }
+        // Opcional: Abrir el carrito automáticamente al agregar
+        openCart();
     };
 
     const removeFromCart = (id) => {
         setCart(cart.filter(item => item._id !== id));
     };
 
-    // --- FUNCIÓN ACTUALIZAR CANTIDAD CON VALIDACIÓN ---
     const updateQuantity = (id, newQuantity) => {
         if (newQuantity < 1) return;
-
-        // Buscamos el item para chequear su stock máximo
         const item = cart.find(i => i._id === id);
-
         if (item && newQuantity > item.stock) {
             alert(`No puedes agregar más. Stock máximo disponible: ${item.stock}`);
-            return; // No actualizamos si se pasa
+            return;
         }
-
         setCart(cart.map(item =>
             item._id === id ? { ...item, quantity: newQuantity } : item
         ));
@@ -71,7 +76,6 @@ const CartProvider = ({ children }) => {
         setCart([]);
     };
 
-    // Función para iniciar el pago con MercadoPago
     const handlePayment = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -79,7 +83,6 @@ const CartProvider = ({ children }) => {
                 alert("Debes iniciar sesión para pagar");
                 return;
             }
-
             const response = await fetch(`${API_URL}/api/payment/create-preference`, {
                 method: 'POST',
                 headers: {
@@ -88,16 +91,13 @@ const CartProvider = ({ children }) => {
                 },
                 body: JSON.stringify({ items: cart })
             });
-
             const data = await response.json();
-
             if (data.url) {
                 window.location.href = data.url;
             } else {
                 console.error("No se recibió la URL de pago", data);
                 alert("Error al generar el pago");
             }
-
         } catch (error) {
             console.error("Error en pago:", error);
             alert("Hubo un error al conectar con MercadoPago");
@@ -112,7 +112,13 @@ const CartProvider = ({ children }) => {
             updateQuantity,
             clearCart,
             total,
-            handlePayment
+            handlePayment,
+            // --- 4. EXPORTAMOS LO NUEVO ---
+            isCartOpen,
+            toggleCart,
+            closeCart,
+            openCart,
+            itemsCount
         }}>
             {children}
         </CartContext.Provider>
