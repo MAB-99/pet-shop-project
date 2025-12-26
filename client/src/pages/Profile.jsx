@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { User, Package, Calendar, MapPin, Loader2, AlertCircle } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import { API_URL } from '../config';
 
 const Profile = () => {
     const { auth, cargando } = useAuth();
