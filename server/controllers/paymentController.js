@@ -62,45 +62,51 @@ export const createPreference = async (req, res) => {
 // --- RECIBIR WEBHOOK (LA FUNCIÓN QUE PEDISTE) ---
 export const receiveWebhook = async (req, res) => {
     try {
-        const { type, data } = req.query;
+        // 1. CAMBIO IMPORTANTE: Leemos del BODY, no del Query
+        const paymentId = req.body?.data?.id || req.query?.id;
+        const type = req.body?.type || req.query?.topic;
+
+        // Log para depurar qué está llegando
+        console.log("📩 Webhook recibido. ID:", paymentId, "Tipo:", type);
+
+        // Si no hay ID, respondemos OK para que MP deje de insistir, pero no hacemos nada.
+        if (!paymentId || (type !== 'payment' && type !== 'merchant_order')) {
+            return res.sendStatus(200);
+        }
 
         if (type === 'payment') {
             const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
             const payment = new Payment(client);
 
-            // 1. Consultamos a MP el estado actual del pago
-            const paymentData = await payment.get({ id: data.id });
+            // Consultamos a MP
+            const paymentData = await payment.get({ id: paymentId });
 
-            // 2. Verificamos si está aprobado
             if (paymentData.status === 'approved') {
-
-                // 3. Recuperamos el ID de nuestra orden desde "external_reference"
                 const orderId = paymentData.external_reference;
 
-                console.log(`💰 Pago aprobado para la Orden: ${orderId}`);
-
-                // 4. Buscamos y actualizamos en MongoDB
-                const order = await Order.findById(orderId);
-
-                if (order) {
-                    order.isPaid = true;
-                    order.paidAt = new Date();
-                    order.paymentResult = { // Guardamos evidencia del pago
-                        id: paymentData.id,
-                        status: paymentData.status,
-                        email: paymentData.payer.email
-                    };
-
-                    await order.save();
-                    console.log("✅ Orden actualizada a PAGADO en DB");
-                } else {
-                    console.error("❌ Orden no encontrada en DB");
+                // Si por alguna razón external_reference viene vacío, evitamos el crash
+                if (orderId) {
+                    const order = await Order.findById(orderId);
+                    if (order) {
+                        order.isPaid = true;
+                        order.paidAt = new Date();
+                        order.paymentResult = {
+                            id: paymentData.id,
+                            status: paymentData.status,
+                            email: paymentData.payer.email
+                        };
+                        await order.save();
+                        console.log(`✅ Orden ${orderId} pagada exitosamente`);
+                    }
                 }
             }
         }
+        // Siempre responder 200 OK
         res.sendStatus(200);
+
     } catch (error) {
-        console.error("Webhook Error:", error);
-        res.sendStatus(500);
+        console.error("Webhook Error:", error.message);
+        // Respondemos 200 aunque falle nuestra lógica interna para que MP no reintente infinitamente
+        res.sendStatus(200);
     }
 };
