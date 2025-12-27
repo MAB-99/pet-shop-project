@@ -20,7 +20,7 @@ export const createPreference = async (req, res) => {
                 price: item.price,
                 qty: item.quantity
             })),
-            shippingAddress: { address: 'A coordinar', city: 'Cba', country: 'Arg' }, // Placeholder si no la pides antes
+            shippingAddress: { address: 'A coordinar', city: 'Cba', country: 'Arg', postalCode: '5000' }, // Placeholder si no la pides antes
             paymentMethod: 'MercadoPago',
             totalPrice: items.reduce((acc, item) => acc + item.price * item.quantity, 0),
             isPaid: false
