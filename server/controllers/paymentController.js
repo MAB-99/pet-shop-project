@@ -1,18 +1,15 @@
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
-import Order from '../models/Order.js'; // <--- 1. IMPORTANTE: Importa tu modelo
+import Order from '../models/Order.js';
+import Product from '../models/Product.js'; // <--- 1. NUEVA IMPORTACIÓN
 
-
-// --- CREAR PREFERENCIA (CON EL PUENTE) ---
+// --- CREAR PREFERENCIA ---
 export const createPreference = async (req, res) => {
     try {
         const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-        const { items } = req.body;
+        const { items, shippingAddress } = req.body; // Asegúrate de recibir shippingAddress
 
-        // A. PRIMERO: Creamos la orden en "Pendiente" en nuestra BD
-        // Nota: Asumimos que req.user existe (necesitas el middleware de auth)
-        // Si no tienes address aquí, puedes poner valores por defecto o pedirla antes.
         const newOrder = new Order({
-            user: req.user._id, // Usuario autenticado
+            user: req.user._id,
             orderItems: items.map(item => ({
                 product: item._id,
                 name: item.name,
@@ -20,19 +17,24 @@ export const createPreference = async (req, res) => {
                 price: item.price,
                 qty: item.quantity
             })),
-            shippingAddress: { address: 'A coordinar', city: 'Cba', country: 'Arg', postalCode: '5000' }, // Placeholder si no la pides antes
+            shippingAddress: {
+                address: shippingAddress?.address || 'Calle Falsa 123',
+                city: shippingAddress?.city || 'Córdoba',
+                postalCode: shippingAddress?.postalCode || '5000', // Valor por defecto para evitar error
+                country: 'Argentina'
+            },
             paymentMethod: 'MercadoPago',
             totalPrice: items.reduce((acc, item) => acc + item.price * item.quantity, 0),
             isPaid: false
         });
 
-        const savedOrder = await newOrder.save(); // ¡Guardamos la orden!
+        const savedOrder = await newOrder.save();
 
-        // B. SEGUNDO: Creamos la preferencia en MP pasándole el ID de la orden
         const preference = new Preference(client);
         const result = await preference.create({
             body: {
                 items: items.map(item => ({
+                    id: item._id, // Enviamos ID del producto a MP por si acaso
                     title: item.name,
                     quantity: Number(item.quantity),
                     unit_price: Number(item.price),
@@ -45,31 +47,24 @@ export const createPreference = async (req, res) => {
                 },
                 auto_return: "approved",
                 notification_url: "https://backend-fidos-petshop.onrender.com/api/payment/webhook",
-
-                // --- EL PUENTE MÁGICO ---
-                external_reference: savedOrder._id.toString() // <--- ¡AQUÍ ESTÁ LA CLAVE!
+                external_reference: savedOrder._id.toString()
             }
         });
 
         res.json({ id: result.id, url: result.init_point });
 
     } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Error al crear pago" });
+        console.error("Error creando preferencia:", error);
+        res.status(500).json({ error: "Error al procesar el pago" });
     }
 };
 
-// --- RECIBIR WEBHOOK (LA FUNCIÓN QUE PEDISTE) ---
+// --- RECIBIR WEBHOOK (CON ACTUALIZACIÓN DE STOCK) ---
 export const receiveWebhook = async (req, res) => {
     try {
-        // 1. CAMBIO IMPORTANTE: Leemos del BODY, no del Query
         const paymentId = req.body?.data?.id || req.query?.id;
         const type = req.body?.type || req.query?.topic;
 
-        // Log para depurar qué está llegando
-        console.log("📩 Webhook recibido. ID:", paymentId, "Tipo:", type);
-
-        // Si no hay ID, respondemos OK para que MP deje de insistir, pero no hacemos nada.
         if (!paymentId || (type !== 'payment' && type !== 'merchant_order')) {
             return res.sendStatus(200);
         }
@@ -78,16 +73,17 @@ export const receiveWebhook = async (req, res) => {
             const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
             const payment = new Payment(client);
 
-            // Consultamos a MP
             const paymentData = await payment.get({ id: paymentId });
 
             if (paymentData.status === 'approved') {
                 const orderId = paymentData.external_reference;
 
-                // Si por alguna razón external_reference viene vacío, evitamos el crash
                 if (orderId) {
                     const order = await Order.findById(orderId);
-                    if (order) {
+
+                    // Solo actualizamos si la orden NO estaba pagada previamente
+                    // Esto evita descontar stock doble si MP manda el webhook 2 veces
+                    if (order && !order.isPaid) {
                         order.isPaid = true;
                         order.paidAt = new Date();
                         order.paymentResult = {
@@ -95,18 +91,30 @@ export const receiveWebhook = async (req, res) => {
                             status: paymentData.status,
                             email: paymentData.payer.email
                         };
+
                         await order.save();
-                        console.log(`✅ Orden ${orderId} pagada exitosamente`);
+                        console.log(`✅ Orden ${orderId} marcada como PAGADA.`);
+
+                        // --- 2. MAGIA: ACTUALIZAR STOCK DE PRODUCTOS ---
+                        console.log("🔄 Actualizando stock de productos...");
+
+                        for (const item of order.orderItems) {
+                            const product = await Product.findById(item.product);
+                            if (product) {
+                                product.stock = product.stock - item.qty;
+                                await product.save();
+                                console.log(`   🔻 ${product.name}: Stock bajó a ${product.stock}`);
+                            }
+                        }
+                        console.log("✨ Stock actualizado correctamente.");
+                        // -----------------------------------------------
                     }
                 }
             }
         }
-        // Siempre responder 200 OK
         res.sendStatus(200);
-
     } catch (error) {
         console.error("Webhook Error:", error.message);
-        // Respondemos 200 aunque falle nuestra lógica interna para que MP no reintente infinitamente
         res.sendStatus(200);
     }
 };
