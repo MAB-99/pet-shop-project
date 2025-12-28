@@ -420,6 +420,7 @@ const OrdersTab = () => {
                                 <th className="p-4 font-semibold">ID Orden</th>
                                 <th className="p-4 font-semibold">Cliente</th>
                                 <th className="p-4 font-semibold">Fecha</th>
+                                <th className="p-4 font-semibold">Estado Pago</th>
                                 <th className="p-4 font-semibold">Total</th>
                                 <th className="p-4 font-semibold">Estado</th>
                                 <th className="p-4 font-semibold">Acciones</th>
@@ -437,6 +438,18 @@ const OrdersTab = () => {
                                     </td>
                                     <td className="p-4 text-sm text-gray-600">
                                         {new Date(order.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.isPaid
+                                                ? 'bg-green-100 text-green-800' // Verde si está pagado
+                                                : 'bg-yellow-100 text-yellow-800' // Amarillo si está pendiente
+                                            }`}>
+                                            {order.isPaid ? 'Aprobado' : 'Pendiente'}
+                                        </span>
+                                        {/* Opcional: Mostrar el método de pago debajo en pequeño */}
+                                        <div className="text-xs text-gray-400 mt-1">
+                                            {order.paymentMethod === 'MercadoPago' ? 'Mercado Pago' : 'Efectivo'}
+                                        </div>
                                     </td>
                                     <td className="p-4 text-sm font-bold text-gray-800">
                                         ${order.totalPrice}

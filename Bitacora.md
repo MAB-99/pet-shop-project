@@ -364,3 +364,8 @@ La función para crear tokens recibe 3 parámetros:
 - **Problema Detectado:** El botón del carrito en el `Header` no desplegaba el menú lateral porque no había comunicación entre componentes hermanos.
 - **Solución Arquitectónica:** Se migró el control de visibilidad (`isOpen`) al Contexto Global (`CartProvider`).
 - **Cambios Realizados:**
+
+## 43. Mejora en Dashboard Admin (UI)
+- **Visualización de Pagos:** Se agregó una columna de estado en la tabla de órdenes para identificar rápidamente transacciones aprobadas vs. pendientes.
+- **Feedback Visual:** Uso de badges de color (Verde/Amarillo) basados en la propiedad `isPaid` de la base de datos.
+- **Feedback Adicional:** Se agregó el método de pago (MP/Efectivo) debajo del estado del pago.
