@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ShoppingCart, User, LogOut, Shield, ChevronDown } from 'lucide-react';
+import NotificationMenu from './NotificationMenu';
+import useNotifications from '../hooks/useNotification';
+import { Bell } from 'lucide-react';
 
 // IMPORTACIONES SEPARADAS (Muy importante)
 import useAuth from '../hooks/useAuth';
@@ -16,9 +19,12 @@ const Header = () => {
 
     // 1. Hook de USUARIO (Para auth, cerrarSesion)
     const { auth, cerrarSesion } = useAuth();
+    const { notifications, unreadCount, markAsRead } = useNotifications();
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
     // 2. Hook de CARRITO (Para itemsCount, toggleCart)
     const { itemsCount, toggleCart } = useCart();
+
 
     const navItems = [
         { name: 'Inicio', path: '/' },
@@ -82,6 +88,32 @@ const Header = () => {
 
                     {/* ICONOS LADO DERECHO */}
                     <div className="flex items-center space-x-4">
+                        {/* 🔔 NOTIFICACIONES (Solo si está logueado) */}
+                        {auth._id && (
+                            <div className="relative">
+                                <button
+                                    className="relative p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                                    onClick={() => setIsNotifOpen(!isNotifOpen)}
+                                >
+                                    <Bell className="h-5 w-5" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold border-2 border-white">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                <AnimatePresence>
+                                    {isNotifOpen && (
+                                        <NotificationMenu
+                                            notifications={notifications}
+                                            markAsRead={markAsRead}
+                                            onClose={() => setIsNotifOpen(false)}
+                                        />
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        )}
 
                         {/* 🛒 BOTÓN CARRITO (Usa toggleCart del Contexto) */}
                         <button
