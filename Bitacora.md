@@ -386,3 +386,15 @@ La función para crear tokens recibe 3 parámetros:
   - Refactorización de `Login.jsx` para mostrar feedback de éxito/error en el inicio de sesión.
   - Refactorización de `CartDrawer.jsx` para notificaciones de compra, validación de stock y errores.
 - **Resultado:** Feedback visual no intrusivo, estético y consistente con el diseño de la aplicación.
+
+## 46. Sistema de Notificaciones y Ajuste de Webhooks
+- **Funcionalidad:** Sistema de alertas para administradores y usuarios sobre eventos importantes (Ventas, Stock, etc.).
+- **Backend:**
+  - Creación del modelo `Notification` y rutas API.
+  - Integración en `paymentController`: Generación automática de alerta al Admin tras pago exitoso.
+  - Refactorización de `receiveWebhook` para evitar duplicidad de lógica y errores de variables (`totalPrice`).
+- **Frontend:**
+  - Creación de Hook `useNotifications` con *polling* (actualización cada 30s).
+  - Implementación de UI: Componente `NotificationMenu` y contador en el Header.
+  - Corrección de rutas API (singular/plural) para sincronizar con el servidor.
+- **Resultado:** El administrador recibe un aviso visual inmediato cuando se concreta una venta.

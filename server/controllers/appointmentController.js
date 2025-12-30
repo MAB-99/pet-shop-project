@@ -1,4 +1,5 @@
 import Appointment from '../models/Appointment.js';
+import Notification from '../models/Notification.js';
 
 // 1. Crear nueva solicitud (Cliente)
 const createAppointment = async (req, res) => {
@@ -14,6 +15,13 @@ const createAppointment = async (req, res) => {
         });
 
         const savedAppointment = await appointment.save();
+
+        await Notification.create({
+            user: null, // Para todos los admins
+            message: `¡Nueva solicitud de turno!`,
+            type: 'appointment',
+            link: '/admin'
+        });
         res.status(201).json(savedAppointment);
     } catch (error) {
         console.log(error);
@@ -45,6 +53,13 @@ const updateAppointmentStatus = async (req, res) => {
         if (!appointment) {
             return res.status(404).json({ msg: 'Turno no encontrado' });
         }
+
+        await Notification.create({
+            user: null, // Para todos los admins
+            message: `¡Turno ${appointment.status}!`,
+            type: 'appointment',
+            link: '/admin'
+        });
 
         appointment.status = status;
 

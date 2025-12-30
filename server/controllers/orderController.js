@@ -1,5 +1,6 @@
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import Notification from '../models/Notification.js';
 
 const addOrderItems = async (req, res) => {
     const {
@@ -29,6 +30,13 @@ const addOrderItems = async (req, res) => {
         });
 
         const createdOrder = await order.save();
+
+        await Notification.create({
+            user: null, // Para todos los admins
+            message: `¡Nueva orden!`,
+            type: 'order',
+            link: '/admin'
+        });
         res.status(201).json(createdOrder);
     }
 };

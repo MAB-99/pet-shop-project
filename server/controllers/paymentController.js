@@ -66,7 +66,6 @@ export const receiveWebhook = async (req, res) => {
         const paymentId = req.body?.data?.id || req.query?.id;
         const type = req.body?.type || req.query?.topic;
 
-        // Si no es un pago, ignoramos pero respondemos OK
         if (!paymentId || (type !== 'payment' && type !== 'merchant_order')) {
             return res.sendStatus(200);
         }
@@ -75,43 +74,45 @@ export const receiveWebhook = async (req, res) => {
             const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
             const payment = new Payment(client);
 
-            // 1. Consultar estado a MP
             const paymentData = await payment.get({ id: paymentId });
 
-            // 2. Si está aprobado...
             if (paymentData.status === 'approved') {
                 const orderId = paymentData.external_reference;
 
                 if (orderId) {
-                    const order = await Order.findById(orderId);
+                    // 🔥 CORRECCIÓN CLAVE: ACTUALIZACIÓN ATÓMICA
+                    // Intentamos buscar y actualizar la orden SOLO si isPaid es false.
+                    // Si ya era true, esto devolverá null y no entrará al if.
+                    const order = await Order.findOneAndUpdate(
+                        { _id: orderId, isPaid: false }, // Filtro: ID correcto Y que NO esté pagada
+                        {
+                            isPaid: true,
+                            paidAt: new Date(),
+                            paymentResult: {
+                                id: paymentData.id,
+                                status: paymentData.status,
+                                email: paymentData.payer.email
+                            }
+                        },
+                        { new: true } // Nos devuelve la orden ya actualizada
+                    );
 
-                    // 3. Verificamos que la orden exista y NO esté pagada aún (Evitar duplicados)
-                    if (order && !order.isPaid) {
+                    // Si 'order' existe, significa que NOSOTROS fuimos los primeros en marcarla.
+                    if (order) {
+                        console.log(`✅ Orden ${orderId} procesada correctamente (Atomic).`);
 
-                        // A. MARCAR COMO PAGADA
-                        order.isPaid = true;
-                        order.paidAt = new Date();
-                        order.paymentResult = {
-                            id: paymentData.id,
-                            status: paymentData.status,
-                            email: paymentData.payer.email
-                        };
-                        await order.save();
-                        console.log(`✅ Orden ${orderId} pagada y guardada.`);
-
-                        // B. ACTUALIZAR STOCK
+                        // 1. ACTUALIZAR STOCK
                         console.log("🔄 Actualizando stock...");
                         for (const item of order.orderItems) {
                             const product = await Product.findById(item.product);
                             if (product) {
-                                product.stock = Math.max(0, product.stock - item.qty); // Evitar negativos
+                                product.stock = Math.max(0, product.stock - item.qty);
                                 await product.save();
                                 console.log(`   🔻 ${product.name}: Stock bajó a ${product.stock}`);
                             }
                         }
 
-                        // C. CREAR NOTIFICACIÓN ADMIN
-                        // (Aquí estaba el error de totalPrice, usamos order.totalPrice)
+                        // 2. CREAR NOTIFICACIÓN (Solo una vez)
                         await Notification.create({
                             user: null, // Para todos los admins
                             message: `💰 ¡Nueva venta! Orden #${order._id.toString().slice(-6)} pagada ($${order.totalPrice}).`,
@@ -119,6 +120,8 @@ export const receiveWebhook = async (req, res) => {
                             link: '/admin'
                         });
                         console.log("🔔 Notificación enviada a Admins");
+                    } else {
+                        console.log(`⚠️ Webhook duplicado recibido para orden ${orderId}. Ignorando.`);
                     }
                 }
             }
@@ -126,6 +129,6 @@ export const receiveWebhook = async (req, res) => {
         res.sendStatus(200);
     } catch (error) {
         console.error("Webhook Error:", error.message);
-        res.sendStatus(200); // Responder OK para que MP no reintente infinitamente si falla nuestro código
+        res.sendStatus(200);
     }
 };
