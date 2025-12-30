@@ -4,7 +4,7 @@ import { CartProvider } from './context/CartProvider';
 import MainLayout from './layout/MainLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CartDrawer from './components/CartDrawer';
-import Header from './components/Header';
+import { Toaster } from 'react-hot-toast';
 
 // PÁGINAS
 import Login from './pages/Login';
@@ -20,6 +20,17 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          toastOptions={{
+            style: {
+              borderRadius: '10px',
+              background: '#333',
+              color: '#fff',
+            },
+          }}
+        />
         <CartDrawer />
         <Routes>
           <Route path="/" element={<MainLayout />}>

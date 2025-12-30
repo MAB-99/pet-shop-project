@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import { API_URL } from '../lib/constants';
+import toast from 'react-hot-toast';
 
 const CartContext = createContext();
 
@@ -33,7 +34,7 @@ const CartProvider = ({ children }) => {
     // --- FUNCIÓN AGREGAR CON VALIDACIÓN DE STOCK ---
     const addToCart = (product) => {
         if (product.stock <= 0) {
-            alert("Lo sentimos, este producto está agotado.");
+            toast.error("Lo sentimos, este producto está agotado.");
             return;
         }
 
@@ -41,7 +42,7 @@ const CartProvider = ({ children }) => {
 
         if (existingItem) {
             if (existingItem.quantity + 1 > product.stock) {
-                alert(`¡Máximo stock alcanzado! Solo quedan ${product.stock} unidades de ${product.name}.`);
+                toast.error(`¡Máximo stock alcanzado! Solo quedan ${product.stock} unidades de ${product.name}.`);
                 return;
             }
             setCart(cart.map(item =>
@@ -64,7 +65,7 @@ const CartProvider = ({ children }) => {
         if (newQuantity < 1) return;
         const item = cart.find(i => i._id === id);
         if (item && newQuantity > item.stock) {
-            alert(`No puedes agregar más. Stock máximo disponible: ${item.stock}`);
+            toast.error(`No puedes agregar más. Stock máximo disponible: ${item.stock}`);
             return;
         }
         setCart(cart.map(item =>
@@ -80,7 +81,7 @@ const CartProvider = ({ children }) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert("Debes iniciar sesión para pagar");
+                toast.error("Debes iniciar sesión para pagar");
                 return;
             }
             const response = await fetch(`${API_URL}/api/payment/create-preference`, {
@@ -96,11 +97,11 @@ const CartProvider = ({ children }) => {
                 window.location.href = data.url;
             } else {
                 console.error("No se recibió la URL de pago", data);
-                alert("Error al generar el pago");
+                toast.error("Error al generar el pago");
             }
         } catch (error) {
             console.error("Error en pago:", error);
-            alert("Hubo un error al conectar con MercadoPago");
+            toast.error("Hubo un error al conectar con MercadoPago");
         }
     };
 

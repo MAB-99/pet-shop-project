@@ -369,3 +369,20 @@ La función para crear tokens recibe 3 parámetros:
 - **Visualización de Pagos:** Se agregó una columna de estado en la tabla de órdenes para identificar rápidamente transacciones aprobadas vs. pendientes.
 - **Feedback Visual:** Uso de badges de color (Verde/Amarillo) basados en la propiedad `isPaid` de la base de datos.
 - **Feedback Adicional:** Se agregó el método de pago (MP/Efectivo) debajo del estado del pago.
+
+## 44. Gestión Automática de Inventario (Backend)
+- **Funcionalidad:** Implementación de lógica de descuento de stock en tiempo real.
+- **Flujo:**
+  1. El Webhook recibe confirmación de pago `approved`.
+  2. Se valida que la orden no haya sido procesada previamente (idempotencia).
+  3. Se iteran los items de la orden y se actualiza el documento `Product` en MongoDB restando la cantidad vendida.
+- **Resultado:** El inventario de la tienda refleja las ventas inmediatamente después del pago.
+
+## 45. Mejora de UI/UX: Notificaciones Modernas
+- **Objetivo:** Reemplazar las alertas nativas del navegador (`window.alert`) que interrumpen la navegación y se ven anticuadas.
+- **Herramienta:** Implementación de la librería `react-hot-toast`.
+- **Cambios Realizados:**
+  - Configuración global del componente `<Toaster />` en `App.jsx`.
+  - Refactorización de `Login.jsx` para mostrar feedback de éxito/error en el inicio de sesión.
+  - Refactorización de `CartDrawer.jsx` para notificaciones de compra, validación de stock y errores.
+- **Resultado:** Feedback visual no intrusivo, estético y consistente con el diseño de la aplicación.

@@ -6,6 +6,7 @@ import axios from 'axios';
 import useCart from '../hooks/useCart';
 import useAuth from '../hooks/useAuth';
 import { API_URL } from '../lib/constants';
+import toast from 'react-hot-toast';
 
 // CAMBIO 1: Ya no recibe props ({ isOpen, onClose })
 const CartDrawer = () => {
@@ -31,7 +32,7 @@ const CartDrawer = () => {
 
     const handleManualCheckoutClick = () => {
         if (!auth._id) {
-            alert("Debes iniciar sesión para comprar");
+            toast.error("Debes iniciar sesión para comprar");
             // Usamos closeCart del contexto
             closeCart();
             navigate('/login');
@@ -69,7 +70,7 @@ const CartDrawer = () => {
             };
             const { data } = await axios.post(`${API_URL}/api/order`, orderData, config);
 
-            alert(`¡Orden #${data._id} creada con éxito! Nos contactaremos para el envío.`);
+            toast.success(`¡Orden #${data._id} creada con éxito! Nos contactaremos para el envío.`);
             clearCart();
             setStep('cart');
             // Usamos closeCart del contexto
@@ -77,7 +78,7 @@ const CartDrawer = () => {
 
         } catch (error) {
             console.error(error);
-            alert("Error al procesar la orden: " + (error.response?.data?.msg || error.message));
+            toast.error("Error al procesar la orden: " + (error.response?.data?.msg || error.message));
         } finally {
             setLoading(false);
         }

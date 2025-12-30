@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Loader2, Mail, Lock } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import { API_URL } from '../lib/constants';
+import toast from 'react-hot-toast';
 
 function Login() {
     const navigate = useNavigate();
@@ -34,10 +35,12 @@ function Login() {
             // 3. Redireccionamos (Por ahora al home, luego al perfil)
             console.log("Login Exitoso:", data);
             navigate('/');
+            toast.success('Login Exitoso, Bienvenido ' + data.user.name);
 
         } catch (error) {
             // Manejo de errores del backend
             setAlerta(error.response?.data?.msg || 'Hubo un error al iniciar sesión');
+            toast.error(error.response?.data?.msg || 'Hubo un error al iniciar sesión');
         } finally {
             setLoading(false);
         }
