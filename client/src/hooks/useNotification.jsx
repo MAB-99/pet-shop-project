@@ -16,7 +16,7 @@ const useNotifications = () => {
             const token = localStorage.getItem('token');
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
-            const { data } = await axios.get(`${API_URL}/api/notifications`, config);
+            const { data } = await axios.get(`${API_URL}/api/notification`, config);
 
             setNotifications(data);
             setUnreadCount(data.filter(n => !n.isRead).length);
@@ -29,7 +29,7 @@ const useNotifications = () => {
     const markAsRead = async (id, link) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${API_URL}/api/notifications/${id}/read`, {}, {
+            await axios.put(`${API_URL}/api/notification/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
