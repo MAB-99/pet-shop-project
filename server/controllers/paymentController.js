@@ -1,13 +1,13 @@
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
-import Notification from '../models/Notification.js';
+import Notification from '../models/Notification.js'; // Asegúrate de que la ruta sea correcta
 
 // --- CREAR PREFERENCIA ---
 export const createPreference = async (req, res) => {
     try {
         const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-        const { items, shippingAddress } = req.body; // Asegúrate de recibir shippingAddress
+        const { items, shippingAddress } = req.body;
 
         const newOrder = new Order({
             user: req.user._id,
@@ -21,7 +21,7 @@ export const createPreference = async (req, res) => {
             shippingAddress: {
                 address: shippingAddress?.address || 'Calle Falsa 123',
                 city: shippingAddress?.city || 'Córdoba',
-                postalCode: shippingAddress?.postalCode || '5000', // Valor por defecto para evitar error
+                postalCode: shippingAddress?.postalCode || '5000',
                 country: 'Argentina'
             },
             paymentMethod: 'MercadoPago',
@@ -35,7 +35,7 @@ export const createPreference = async (req, res) => {
         const result = await preference.create({
             body: {
                 items: items.map(item => ({
-                    id: item._id, // Enviamos ID del producto a MP por si acaso
+                    id: item._id,
                     title: item.name,
                     quantity: Number(item.quantity),
                     unit_price: Number(item.price),
@@ -60,12 +60,13 @@ export const createPreference = async (req, res) => {
     }
 };
 
-// --- RECIBIR WEBHOOK (CON ACTUALIZACIÓN DE STOCK) ---
+// --- RECIBIR WEBHOOK (Lógica Unificada) ---
 export const receiveWebhook = async (req, res) => {
     try {
         const paymentId = req.body?.data?.id || req.query?.id;
         const type = req.body?.type || req.query?.topic;
 
+        // Si no es un pago, ignoramos pero respondemos OK
         if (!paymentId || (type !== 'payment' && type !== 'merchant_order')) {
             return res.sendStatus(200);
         }
@@ -74,17 +75,20 @@ export const receiveWebhook = async (req, res) => {
             const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
             const payment = new Payment(client);
 
+            // 1. Consultar estado a MP
             const paymentData = await payment.get({ id: paymentId });
 
+            // 2. Si está aprobado...
             if (paymentData.status === 'approved') {
                 const orderId = paymentData.external_reference;
 
                 if (orderId) {
                     const order = await Order.findById(orderId);
 
-                    // Solo actualizamos si la orden NO estaba pagada previamente
-                    // Esto evita descontar stock doble si MP manda el webhook 2 veces
+                    // 3. Verificamos que la orden exista y NO esté pagada aún (Evitar duplicados)
                     if (order && !order.isPaid) {
+
+                        // A. MARCAR COMO PAGADA
                         order.isPaid = true;
                         order.paidAt = new Date();
                         order.paymentResult = {
@@ -92,46 +96,29 @@ export const receiveWebhook = async (req, res) => {
                             status: paymentData.status,
                             email: paymentData.payer.email
                         };
-
                         await order.save();
-                        console.log(`✅ Orden ${orderId} marcada como PAGADA.`);
+                        console.log(`✅ Orden ${orderId} pagada y guardada.`);
 
-                        // --- 2. MAGIA: ACTUALIZAR STOCK DE PRODUCTOS ---
-                        console.log("🔄 Actualizando stock de productos...");
-
+                        // B. ACTUALIZAR STOCK
+                        console.log("🔄 Actualizando stock...");
                         for (const item of order.orderItems) {
                             const product = await Product.findById(item.product);
                             if (product) {
-                                product.stock = product.stock - item.qty;
+                                product.stock = Math.max(0, product.stock - item.qty); // Evitar negativos
                                 await product.save();
                                 console.log(`   🔻 ${product.name}: Stock bajó a ${product.stock}`);
                             }
                         }
-                        console.log("✨ Stock actualizado correctamente.");
 
-                        if (paymentData.status === 'approved') {
-                            const orderId = paymentData.external_reference;
-
-                            if (orderId) {
-                                const order = await Order.findById(orderId);
-
-                                if (order && !order.isPaid) {
-                                    // ... (lógica existente de marcar isPaid y descontar stock) ...
-
-                                    // 👇 2. AGREGAR ESTO AL FINAL DEL IF:
-                                    // Crear Notificación para Admins
-                                    await Notification.create({
-                                        user: null, // null = Para todos los admins
-                                        message: `💰 ¡Nueva venta! Orden #${order._id.toString().slice(-6)} pagada ($${totalPrice}).`,
-                                        type: 'order',
-                                        link: '/admin' // A dónde lleva el clic
-                                    });
-                                    console.log("🔔 Notificación de venta creada para admins");
-                                }
-                            }
-                        }
-
-                        // -----------------------------------------------
+                        // C. CREAR NOTIFICACIÓN ADMIN
+                        // (Aquí estaba el error de totalPrice, usamos order.totalPrice)
+                        await Notification.create({
+                            user: null, // Para todos los admins
+                            message: `💰 ¡Nueva venta! Orden #${order._id.toString().slice(-6)} pagada ($${order.totalPrice}).`,
+                            type: 'order',
+                            link: '/admin'
+                        });
+                        console.log("🔔 Notificación enviada a Admins");
                     }
                 }
             }
@@ -139,6 +126,6 @@ export const receiveWebhook = async (req, res) => {
         res.sendStatus(200);
     } catch (error) {
         console.error("Webhook Error:", error.message);
-        res.sendStatus(200);
+        res.sendStatus(200); // Responder OK para que MP no reintente infinitamente si falla nuestro código
     }
 };
