@@ -1,6 +1,7 @@
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import Order from '../models/Order.js';
-import Product from '../models/Product.js'; // <--- 1. NUEVA IMPORTACIÓN
+import Product from '../models/Product.js';
+import Notification from '../models/Notification.js';
 
 // --- CREAR PREFERENCIA ---
 export const createPreference = async (req, res) => {
@@ -107,6 +108,29 @@ export const receiveWebhook = async (req, res) => {
                             }
                         }
                         console.log("✨ Stock actualizado correctamente.");
+
+                        if (paymentData.status === 'approved') {
+                            const orderId = paymentData.external_reference;
+
+                            if (orderId) {
+                                const order = await Order.findById(orderId);
+
+                                if (order && !order.isPaid) {
+                                    // ... (lógica existente de marcar isPaid y descontar stock) ...
+
+                                    // 👇 2. AGREGAR ESTO AL FINAL DEL IF:
+                                    // Crear Notificación para Admins
+                                    await Notification.create({
+                                        user: null, // null = Para todos los admins
+                                        message: `💰 ¡Nueva venta! Orden #${order._id.toString().slice(-6)} pagada ($${totalPrice}).`,
+                                        type: 'order',
+                                        link: '/admin' // A dónde lleva el clic
+                                    });
+                                    console.log("🔔 Notificación de venta creada para admins");
+                                }
+                            }
+                        }
+
                         // -----------------------------------------------
                     }
                 }
