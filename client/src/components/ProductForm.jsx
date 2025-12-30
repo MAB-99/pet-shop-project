@@ -4,6 +4,7 @@ import { Save, X, ImageIcon, Loader2 } from 'lucide-react';
 import uploadImage from '../lib/uploadImage';
 import { Upload } from 'lucide-react';
 import { API_URL } from '../lib/constants';
+import toast from 'react-hot-toast';
 
 const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -71,16 +72,16 @@ const ProductForm = ({ productToEdit, onSuccess, onCancel }) => {
             if (productToEdit) {
                 // MODO EDICIÓN: PUT /api/product/:id
                 await axios.put(`${API_URL}/api/product/${productToEdit._id}`, formData, config);
-                alert('Producto actualizado correctamente');
+                toast.success('Producto actualizado correctamente');
             } else {
                 // MODO CREACIÓN: POST /api/product
                 await axios.post(`${API_URL}/api/product`, formData, config);
-                alert('Producto creado correctamente');
+                toast.success('Producto creado correctamente');
             }
             onSuccess(); // Avisar al padre que recargue la tabla
         } catch (error) {
             console.error(error);
-            alert('Error al guardar: ' + (error.response?.data?.msg || error.message));
+            toast.error('Error al guardar: ' + (error.response?.data?.msg || error.message));
         } finally {
             setLoading(false);
         }
