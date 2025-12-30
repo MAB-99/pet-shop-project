@@ -110,10 +110,67 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+const updateOrderToPaid = async (req, res) => {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+        order.isPaid = true;
+        order.paidAt = Date.now();
+        // Si es manual, paymentResult puede ser genérico
+        order.paymentResult = {
+            id: 'manual',
+            status: 'approved',
+            update_time: Date.now(),
+            email_address: 'admin@manual.com'
+        };
+
+        const updatedOrder = await order.save();
+
+        // 🔔 2. NOTIFICAR AL CLIENTE (Pago Aprobado)
+        await Notification.create({
+            user: order.user,
+            message: `💵 ¡Pago recibido! Tu orden #${order._id.toString().slice(-6)} ya figura como pagada.`,
+            type: 'order',
+            link: `/order/${order._id}`
+        });
+
+        res.json(updatedOrder);
+    } else {
+        res.status(404);
+        throw new Error('Orden no encontrada');
+    }
+};
+
+const updateOrderToDelivered = async (req, res) => {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+        order.isDelivered = true;
+        order.deliveredAt = Date.now();
+
+        const updatedOrder = await order.save();
+
+        // 🔔 3. NOTIFICAR AL CLIENTE (Pedido Enviado/Entregado)
+        await Notification.create({
+            user: order.user,
+            message: `🚚 ¡Tu pedido está en camino! La orden #${order._id.toString().slice(-6)} ha sido marcada como enviada/entregada.`,
+            type: 'order',
+            link: `/order/${order._id}`
+        });
+
+        res.json(updatedOrder);
+    } else {
+        res.status(404);
+        throw new Error('Orden no encontrada');
+    }
+};
+
 export {
     addOrderItems,
     getMyOrders,
     getAllOrders,
     updateOrderStatus,
+    updateOrderToPaid,
+    updateOrderToDelivered,
     getDashboardStats
 };
