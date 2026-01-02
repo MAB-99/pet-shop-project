@@ -71,7 +71,7 @@ const updateAppointment = async (req, res) => {
                     user: appointment.user, // ID del cliente
                     message: `${emoji} ${text}`,
                     type: 'appointment',
-                    link: '/profile' // Para que vaya a ver sus turnos
+                    link: '/perfil' // Para que vaya a ver sus turnos
                 });
             }
 
