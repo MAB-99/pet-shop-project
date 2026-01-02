@@ -398,3 +398,22 @@ La función para crear tokens recibe 3 parámetros:
   - Implementación de UI: Componente `NotificationMenu` y contador en el Header.
   - Corrección de rutas API (singular/plural) para sincronizar con el servidor.
 - **Resultado:** El administrador recibe un aviso visual inmediato cuando se concreta una venta.
+
+## 47. Sistema Integral de Notificaciones y Robustez en Pagos
+- **Objetivo:** Cerrar el ciclo de comunicación entre el sistema, el administrador y el cliente, y solucionar problemas de concurrencia en los pagos.
+- **Backend (Notificaciones):**
+  - Creación del modelo `Notification` (Mensaje, Tipo, Usuario destino, Leído).
+  - Implementación de lógica automática de avisos en los controladores:
+    - **Ventas:** Aviso al Admin cuando entra un pago (Webhook) o una orden en efectivo.
+    - **Turnos:** Aviso al Admin al solicitar, aviso al Cliente al confirmar/cancelar.
+    - **Logística:** Aviso al Cliente cuando su pedido es marcado como "Enviado/Entregado".
+- **Backend (Pagos & Webhooks):**
+  - **Corrección de Bug Crítico:** Solución a la "Condición de Carrera" (Race Condition) en Mercado Pago usando `findOneAndUpdate` atómico para evitar duplicidad de notificaciones y doble descuento de stock.
+  - Estandarización de lectura del Webhook (Body vs Query).
+- **Frontend (Admin Dashboard):**
+  - Implementación de **Botones de Acción Rápida** en tablas (Camión para envíos, Check/X para turnos) para agilizar la gestión.
+  - Corrección de rutas API (Error 404 en `/status`) para sincronizar con el Backend.
+  - Integración de `react-hot-toast` para feedback visual inmediato.
+- **Frontend (Cliente):**
+  - Nuevo componente `NotificationMenu` y Hook `useNotifications` con polling (actualización automática cada 30s).
+  - Indicador visual (punto rojo) en el Header para nuevas alertas.
