@@ -2,7 +2,7 @@ import express from 'express';
 import {
     createAppointment,
     getAllAppointments,
-    updateAppointmentStatus
+    updateAppointment
 } from '../controllers/appointmentController.js';
 import checkAuth from '../middleware/auth.Middleware.js';
 
@@ -13,6 +13,6 @@ router.post('/', checkAuth, createAppointment);
 
 // Rutas Admin
 router.get('/', checkAuth, getAllAppointments);
-router.put('/:id/status', checkAuth, updateAppointmentStatus);
+router.put('/:id', checkAuth, updateAppointment);
 
 export default router;
